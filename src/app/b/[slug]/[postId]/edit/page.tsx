@@ -7,6 +7,9 @@ import { getPost } from "@/lib/posts";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { updatePost } from "../../../actions";
 
+// 회원 정보와 최신 글을 매번 읽어 오므로 서버에서 기다렸다가 보여 줍니다.
+export const instant = false;
+
 export const metadata: Metadata = { title: "글 수정" };
 
 export default async function EditPage({ params }: PageProps<"/b/[slug]/[postId]/edit">) {

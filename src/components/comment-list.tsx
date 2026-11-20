@@ -4,6 +4,7 @@ import type { CurrentUser } from "@/lib/auth";
 import { formatFullDate } from "@/lib/format";
 import type { Comment } from "@/lib/posts";
 import { CommentForm } from "./comment-form";
+import { ReportButton } from "./report-button";
 
 type Props = { comments: Comment[]; slug: string; postId: number; user: CurrentUser | null };
 
@@ -19,8 +20,13 @@ export function CommentList({ comments, slug, postId, user }: Props) {
           {comment.author?.nickname ?? "탈퇴회원"}
         </span>
         <span>{formatFullDate(comment.created_at)}</span>
+        {user && user.id !== comment.author_id && (
+          <span className="ml-auto">
+            <ReportButton commentId={comment.id} />
+          </span>
+        )}
         {user && (user.id === comment.author_id || user.role === "admin") && (
-          <form action={deleteComment} className="ml-auto">
+          <form action={deleteComment} className={user.id === comment.author_id ? "ml-auto" : ""}>
             <input type="hidden" name="slug" value={slug} />
             <input type="hidden" name="postId" value={postId} />
             <input type="hidden" name="commentId" value={comment.id} />

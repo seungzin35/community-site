@@ -1,10 +1,13 @@
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
+import { connection } from "next/server";
 import { supabaseKey, supabaseUrl } from "./config";
 
 /** 서버 컴포넌트, 서버 액션, 라우트 핸들러에서 쓰는 Supabase 클라이언트 */
 export async function createClient() {
   const cookieStore = await cookies();
+  // 로그인 확인은 현재 시각을 쓰므로 항상 요청 시점에 실행되게 합니다.
+  await connection();
 
   return createServerClient(supabaseUrl, supabaseKey, {
     cookies: {

@@ -63,6 +63,12 @@ export async function signup(_: AuthState, formData: FormData): Promise<AuthStat
   if (error) {
     if (error.code === "user_already_exists") return { error: "이미 가입된 이메일이에요." };
     if (error.code === "weak_password") return { error: "더 안전한 비밀번호를 사용해 주세요." };
+    if (error.code === "email_provider_disabled" || error.code === "signup_disabled") {
+      return { error: "지금은 회원가입을 받지 않고 있어요." };
+    }
+    if (error.code === "over_email_send_rate_limit") {
+      return { error: "가입 요청이 너무 많아요. 잠시 후 다시 시도해 주세요." };
+    }
     console.error("회원가입 실패:", error.message);
     return { error: "가입하지 못했어요. 잠시 후 다시 시도해 주세요." };
   }

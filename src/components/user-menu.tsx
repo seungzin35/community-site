@@ -28,6 +28,11 @@ export async function UserMenu() {
 
   return (
     <div className="flex items-center gap-2 text-sm">
+      {user.role === "admin" && (
+        <Link href="/admin" className="rounded-md px-3 py-1.5 font-medium text-primary hover:bg-muted">
+          관리자
+        </Link>
+      )}
       <span className="font-medium">{user.nickname}</span>
       <form action={logout}>
         <button type="submit" className="rounded-md px-3 py-1.5 hover:bg-muted">
