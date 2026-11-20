@@ -33,7 +33,13 @@ export default async function WritePage({ params }: PageProps<"/b/[slug]/write">
       <h1 className="text-xl font-extrabold tracking-tight">
         <span className="text-primary">{board.name}</span> 글쓰기
       </h1>
-      <PostForm action={createPost} slug={slug} userId={user.id} isGallery={board.type === "gallery"} />
+      <PostForm
+        action={createPost}
+        slug={slug}
+        userId={user.id}
+        isGallery={board.type === "gallery"}
+        isAnonymous={board.is_anonymous}
+      />
     </div>
   );
 }

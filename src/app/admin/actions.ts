@@ -43,7 +43,9 @@ function readBoardFields(formData: FormData) {
   const slug = String(formData.get("slug") ?? "").trim().toLowerCase();
   const name = String(formData.get("name") ?? "").trim();
   const description = String(formData.get("description") ?? "").trim().slice(0, 200);
-  const type = formData.get("type") === "gallery" ? "gallery" : "normal";
+  const isAnonymous = formData.get("is_anonymous") === "on";
+  // 익명 게시판은 사진을 받지 않으므로 갤러리로 만들 수 없어요.
+  const type = formData.get("type") === "gallery" && !isAnonymous ? "gallery" : "normal";
   const sortOrder = Math.floor(Number(formData.get("sort_order"))) || 0;
   const isActive = formData.get("is_active") === "on";
 
@@ -52,7 +54,7 @@ function readBoardFields(formData: FormData) {
   }
   if (!name || name.length > 30) return { error: "게시판 이름은 1~30자로 해주세요." } as const;
   return {
-    fields: { slug, name, description, type, sort_order: sortOrder, is_active: isActive },
+    fields: { slug, name, description, type, sort_order: sortOrder, is_active: isActive, is_anonymous: isAnonymous },
   } as const;
 }
 

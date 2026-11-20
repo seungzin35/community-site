@@ -2,7 +2,7 @@ import { Image as ImageIcon, Images, MessageCircle, ThumbsUp } from "lucide-reac
 import Image from "next/image";
 import Link from "next/link";
 import { formatListDate } from "@/lib/format";
-import { imageUrl, type PostListItem } from "@/lib/posts";
+import { authorName, imageUrl, type PostListItem } from "@/lib/posts";
 
 type Item = PostListItem & { board?: { slug: string; name: string } };
 
@@ -38,7 +38,7 @@ export function PostTable({
 
   const row = (post: Item, isNotice: boolean) => {
     const href = `/b/${post.board?.slug ?? slug}/${post.id}`;
-    const nickname = post.author?.nickname ?? "탈퇴회원";
+    const nickname = authorName(post);
     return (
       <li key={`${isNotice ? "n" : "p"}${post.id}`}>
         <Link
@@ -168,7 +168,7 @@ export function PostGrid({ posts, slug }: { posts: PostListItem[]; slug: string 
             <div className="p-3">
               <p className="truncate text-sm font-semibold group-hover:text-primary">{post.title}</p>
               <p className="mt-1 flex items-center gap-2 text-xs text-muted-foreground">
-                <span className="min-w-0 flex-1 truncate">{post.author?.nickname ?? "탈퇴회원"}</span>
+                <span className="min-w-0 flex-1 truncate">{authorName(post)}</span>
                 <span className="inline-flex shrink-0 items-center gap-0.5">
                   <ThumbsUp className="size-3" />
                   {post.like_count}

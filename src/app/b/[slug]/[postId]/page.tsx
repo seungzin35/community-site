@@ -10,7 +10,7 @@ import { ReportButton } from "@/components/report-button";
 import { VoteButtons } from "@/components/vote-buttons";
 import { getCurrentUser } from "@/lib/auth";
 import { formatFullDate } from "@/lib/format";
-import { getBoardBySlug, getComments, getPost, imageUrl } from "@/lib/posts";
+import { authorName, type Comment, getBoardBySlug, getComments, getMyAnonymous, getPost, imageUrl } from "@/lib/posts";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { createPublicClient } from "@/lib/supabase/public";
 import { createClient } from "@/lib/supabase/server";
@@ -24,6 +24,15 @@ export async function generateMetadata({ params }: PageProps<"/b/[slug]/[postId]
   const id = Number((await params).postId);
   const post = Number.isInteger(id) ? await getPost(id) : null;
   return post ? { title: post.title, description: post.content.slice(0, 120) } : {};
+}
+
+/** 익명 글이면 그중 내가 쓴 글/댓글을 확인합니다. */
+async function getMyAnonymousIn(isAnonymous: boolean, postId: number, comments: Comment[], userId?: string) {
+  const anonymousComments = comments.filter((comment) => comment.anon_label !== null).map((comment) => comment.id);
+  if (!userId || (!isAnonymous && anonymousComments.length === 0)) {
+    return { post: false, comments: new Set<number>() };
+  }
+  return getMyAnonymous(await createClient(), userId, postId, anonymousComments);
 }
 
 async function getMyVote(postId: number, userId: string | undefined) {
@@ -53,11 +62,13 @@ export default async function PostPage({ params }: PageProps<"/b/[slug]/[postId]
   ]);
   if (!board || !post || post.board_id !== board.id) notFound();
 
-  const [myVote] = await Promise.all([
+  const [myVote, mine] = await Promise.all([
     getMyVote(id, user?.id),
+    getMyAnonymousIn(post.is_anonymous, id, comments, user?.id),
     createPublicClient().rpc("increment_view_count", { target_post_id: id }),
   ]);
-  const canManage = user && (user.id === post.author_id || user.role === "admin");
+  const isMine = Boolean(user && (user.id === post.author_id || mine.post));
+  const canManage = user && (isMine || user.role === "admin");
 
   return (
     <div className="mx-auto max-w-3xl space-y-4">
@@ -73,9 +84,14 @@ export default async function PostPage({ params }: PageProps<"/b/[slug]/[postId]
         <header className="border-b border-border p-5 sm:p-6">
           <h1 className="break-words text-xl font-extrabold leading-snug tracking-tight sm:text-2xl">{post.title}</h1>
           <div className="mt-4 flex items-center gap-3">
-            <Avatar name={post.author?.nickname} />
+            <Avatar name={post.author?.nickname} anonymous={post.is_anonymous} />
             <div className="min-w-0 flex-1">
-              <p className="truncate text-sm font-semibold">{post.author?.nickname ?? "탈퇴회원"}</p>
+              <p className="flex items-center gap-1.5 truncate text-sm font-semibold">
+                {authorName(post)}
+                {post.is_anonymous && isMine && (
+                  <span className="rounded-md bg-primary-soft px-1.5 py-0.5 text-[11px] font-bold text-primary">내 글</span>
+                )}
+              </p>
               <p className="mt-0.5 flex flex-wrap gap-x-2.5 text-xs text-muted-foreground">
                 <span>{formatFullDate(post.created_at)}</span>
                 <span className="inline-flex items-center gap-1">
@@ -86,7 +102,7 @@ export default async function PostPage({ params }: PageProps<"/b/[slug]/[postId]
                 </span>
               </p>
             </div>
-            {user && user.id !== post.author_id && <ReportButton postId={id} />}
+            {user && !isMine && <ReportButton postId={id} />}
           </div>
         </header>
 
@@ -138,7 +154,9 @@ export default async function PostPage({ params }: PageProps<"/b/[slug]/[postId]
         )}
       </div>
 
-      <CommentList comments={comments} slug={slug} postId={id} user={user} />
+      <CommentList comments={comments} slug={slug} postId={id} user={user} myAnonymous={mine.comments}
+        anonymous={post.is_anonymous}
+      />
     </div>
   );
 }

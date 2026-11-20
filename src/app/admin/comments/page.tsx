@@ -4,7 +4,14 @@ import { adminDeleteComment } from "@/app/admin/actions";
 import { Empty, SearchBox, Section } from "@/components/admin-ui";
 import { ConfirmButton } from "@/components/confirm-button";
 import { Pagination } from "@/components/pagination";
-import { ADMIN_PAGE_SIZE, likePattern, readPage, readQuery } from "@/lib/admin";
+import {
+  ADMIN_PAGE_SIZE,
+  adminAuthorName,
+  COMMENT_OWNER,
+  likePattern,
+  readPage,
+  readQuery,
+} from "@/lib/admin";
 import { formatFullDate } from "@/lib/format";
 import { createClient } from "@/lib/supabase/server";
 
@@ -15,6 +22,7 @@ type Row = {
   content: string;
   created_at: string;
   author: { nickname: string } | null;
+  owner: { user: { nickname: string } | null } | null;
   post: { id: number; title: string; board: { slug: string } | null } | null;
 };
 
@@ -27,7 +35,7 @@ export default async function AdminCommentsPage({ searchParams }: PageProps<"/ad
   let request = supabase
     .from("comments")
     .select(
-      "id, content, created_at, author:profiles!comments_author_id_fkey(nickname), post:posts(id, title, board:boards(slug))",
+      `id, content, created_at, author:profiles!comments_author_id_fkey(nickname), ${COMMENT_OWNER}, post:posts(id, title, board:boards(slug))`,
       { count: "exact" },
     )
     .order("created_at", { ascending: false })
@@ -50,7 +58,7 @@ export default async function AdminCommentsPage({ searchParams }: PageProps<"/ad
               <div className="min-w-0 flex-1">
                 <p className="line-clamp-2 whitespace-pre-wrap break-words">{comment.content}</p>
                 <p className="mt-0.5 truncate text-xs text-muted-foreground">
-                  {comment.author?.nickname ?? "탈퇴회원"} · {formatFullDate(comment.created_at)} ·{" "}
+                  {adminAuthorName(comment.author, comment.owner)} · {formatFullDate(comment.created_at)} ·{" "}
                   {comment.post && (
                     <Link
                       href={`/b/${comment.post.board?.slug}/${comment.post.id}`}

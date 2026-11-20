@@ -44,11 +44,27 @@ export async function createPost(_: ActionState, formData: FormData): Promise<Ac
   const supabase = await createClient();
   const { data: board } = await supabase
     .from("boards")
-    .select("id, type")
+    .select("id, type, is_anonymous")
     .eq("slug", slug)
     .eq("is_active", true)
     .maybeSingle();
   if (!board) return { error: "게시판을 찾을 수 없어요." };
+  if (board.is_anonymous) {
+    // 익명 게시판: 작성자를 남기지 않는 전용 함수로 씁니다(사진은 받지 않아요).
+    if (imagePaths.length) await supabase.storage.from(IMAGE_BUCKET).remove(imagePaths);
+    if (!fields.content) return { error: "내용을 입력해 주세요." };
+    const { data: postId, error } = await supabase.rpc("create_anonymous_post", {
+      target_board_id: board.id,
+      post_title: fields.title,
+      post_content: fields.content,
+    });
+    if (error || !postId) {
+      console.error("익명 글 등록 실패:", error?.message);
+      return { error: "글을 등록하지 못했어요. 잠시 후 다시 시도해 주세요." };
+    }
+    revalidatePath(`/b/${slug}`);
+    redirect(`/b/${slug}/${postId}`);
+  }
   if (board.type === "gallery" && imagePaths.length === 0) {
     return { error: "갤러리에는 사진을 한 장 이상 올려 주세요." };
   }
@@ -137,9 +153,16 @@ export async function addComment(_: ActionState, formData: FormData): Promise<Ac
   if (content.length > 2000) return { error: "댓글은 2000자 이하로 해주세요." };
 
   const supabase = await createClient();
-  const { error } = await supabase
-    .from("comments")
-    .insert({ post_id: postId, author_id: member.user.id, parent_id: parentId, content });
+  const { data: post } = await supabase.from("posts").select("is_anonymous").eq("id", postId).maybeSingle();
+  const { error } = post?.is_anonymous
+    ? await supabase.rpc("create_anonymous_comment", {
+        target_post_id: postId,
+        target_parent_id: parentId,
+        comment_content: content,
+      })
+    : await supabase
+        .from("comments")
+        .insert({ post_id: postId, author_id: member.user.id, parent_id: parentId, content });
   if (error) return { error: "댓글을 등록하지 못했어요." };
 
   revalidatePath(`/b/${slug}/${postId}`);

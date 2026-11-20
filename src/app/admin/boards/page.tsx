@@ -12,7 +12,7 @@ export default async function AdminBoardsPage() {
   const supabase = await createClient();
   const { data } = await supabase
     .from("boards")
-    .select("id, slug, name, description, type, sort_order, is_active, posts(count)")
+    .select("id, slug, name, description, type, sort_order, is_active, is_anonymous, posts(count)")
     .order("sort_order")
     .order("id");
   const boards = (data ?? []) as unknown as (BoardRow & { posts: { count: number }[] })[];
@@ -40,6 +40,7 @@ export default async function AdminBoardsPage() {
                       {board.name}
                     </Link>
                     {board.type === "gallery" && <Badge>갤러리</Badge>}
+                    {board.is_anonymous && <Badge tone="blue">익명</Badge>}
                     {!board.is_active && <Badge tone="red">숨김</Badge>}
                     <span className="text-xs text-muted-foreground">글 {postCount.toLocaleString()}개</span>
                     <form action={deleteBoard} className="ml-auto">

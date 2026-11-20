@@ -4,7 +4,14 @@ import { adminDeletePost, setPostNotice } from "@/app/admin/actions";
 import { Badge, Empty, SearchBox, Section } from "@/components/admin-ui";
 import { ConfirmButton } from "@/components/confirm-button";
 import { Pagination } from "@/components/pagination";
-import { ADMIN_PAGE_SIZE, likePattern, readPage, readQuery } from "@/lib/admin";
+import {
+  ADMIN_PAGE_SIZE,
+  adminAuthorName,
+  likePattern,
+  POST_OWNER,
+  readPage,
+  readQuery,
+} from "@/lib/admin";
 import { formatFullDate } from "@/lib/format";
 import { createClient } from "@/lib/supabase/server";
 
@@ -19,6 +26,7 @@ type Row = {
   created_at: string;
   board: { slug: string; name: string } | null;
   author: { nickname: string } | null;
+  owner: { user: { nickname: string } | null } | null;
 };
 
 export default async function AdminPostsPage({ searchParams }: PageProps<"/admin/posts">) {
@@ -30,7 +38,7 @@ export default async function AdminPostsPage({ searchParams }: PageProps<"/admin
   let request = supabase
     .from("posts")
     .select(
-      "id, title, is_notice, comment_count, like_count, created_at, board:boards(slug, name), author:profiles!posts_author_id_fkey(nickname)",
+      `id, title, is_notice, comment_count, like_count, created_at, board:boards(slug, name), author:profiles!posts_author_id_fkey(nickname), ${POST_OWNER}`,
       { count: "exact" },
     )
     .order("created_at", { ascending: false })
@@ -61,7 +69,7 @@ export default async function AdminPostsPage({ searchParams }: PageProps<"/admin
                   </Link>
                 </div>
                 <p className="mt-0.5 text-xs text-muted-foreground">
-                  {post.board?.name} · {post.author?.nickname ?? "탈퇴회원"} · {formatFullDate(post.created_at)} ·
+                  {post.board?.name} · {adminAuthorName(post.author, post.owner)} · {formatFullDate(post.created_at)} ·
                   추천 {post.like_count} · 댓글 {post.comment_count}
                 </p>
               </div>

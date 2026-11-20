@@ -3,7 +3,8 @@ import { notFound, redirect } from "next/navigation";
 import { NotReady } from "@/components/not-ready";
 import { PostForm } from "@/components/post-form";
 import { getCurrentUser } from "@/lib/auth";
-import { getPost } from "@/lib/posts";
+import { getMyAnonymous, getPost } from "@/lib/posts";
+import { createClient } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { updatePost } from "../../../actions";
 
@@ -22,7 +23,10 @@ export default async function EditPage({ params }: PageProps<"/b/[slug]/[postId]
   const [post, user] = await Promise.all([getPost(id), getCurrentUser()]);
   if (!post) notFound();
   if (!user) redirect(`/login?next=${encodeURIComponent(`/b/${slug}/${id}/edit`)}`);
-  if (post.author_id !== user.id && user.role !== "admin") redirect(`/b/${slug}/${id}`);
+  const isMine =
+    post.author_id === user.id ||
+    (post.is_anonymous && (await getMyAnonymous(await createClient(), user.id, id, [])).post);
+  if (!isMine && user.role !== "admin") redirect(`/b/${slug}/${id}`);
 
   return (
     <div className="space-y-4">
@@ -32,6 +36,7 @@ export default async function EditPage({ params }: PageProps<"/b/[slug]/[postId]
         slug={slug}
         userId={user.id}
         post={{ id: post.id, title: post.title, content: post.content }}
+        isAnonymous={post.is_anonymous}
       />
     </div>
   );

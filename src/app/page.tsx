@@ -1,4 +1,4 @@
-import { ChevronRight, Clock, Flame, Images, MessageSquare, PenLine } from "lucide-react";
+import { ChevronRight, Clock, Flame, HeartHandshake, Images, MessageSquare, PenLine } from "lucide-react";
 import Link from "next/link";
 import { connection } from "next/server";
 import { Suspense } from "react";
@@ -113,7 +113,13 @@ export default async function HomePage() {
                     className="group flex items-center gap-3 rounded-xl px-3 py-2.5 transition-colors hover:bg-muted"
                   >
                     <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-primary-soft text-primary">
-                      {board.type === "gallery" ? <Images className="size-[18px]" /> : <MessageSquare className="size-[18px]" />}
+                      {board.is_anonymous ? (
+                        <HeartHandshake className="size-[18px]" />
+                      ) : board.type === "gallery" ? (
+                        <Images className="size-[18px]" />
+                      ) : (
+                        <MessageSquare className="size-[18px]" />
+                      )}
                     </span>
                     <span className="min-w-0 flex-1">
                       <span className="block truncate text-sm font-semibold">{board.name}</span>

@@ -1,5 +1,6 @@
 "use client";
 
+import { ShieldCheck } from "lucide-react";
 import { useState, useTransition } from "react";
 import type { ActionState } from "@/app/b/actions";
 import { IMAGE_BUCKET, MAX_IMAGES } from "@/lib/posts";
@@ -12,12 +13,14 @@ type Props = {
   /** 수정할 때만 전달 */
   post?: { id: number; title: string; content: string };
   isGallery?: boolean;
+  /** 익명 게시판: 사진 없이, 안내 문구를 보여 줘요. */
+  isAnonymous?: boolean;
 };
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024;
 const inputClass = "field";
 
-export function PostForm({ action, slug, userId, post, isGallery }: Props) {
+export function PostForm({ action, slug, userId, post, isGallery, isAnonymous }: Props) {
   const [files, setFiles] = useState<File[]>([]);
   const [error, setError] = useState<string>();
   const [pending, startTransition] = useTransition();
@@ -76,6 +79,18 @@ export function PostForm({ action, slug, userId, post, isGallery }: Props) {
       <input type="hidden" name="slug" value={slug} />
       {post && <input type="hidden" name="postId" value={post.id} />}
 
+      {isAnonymous && (
+        <div className="flex gap-3 rounded-xl bg-primary-soft p-3 text-sm">
+          <ShieldCheck className="mt-0.5 size-5 shrink-0 text-primary" />
+          <p className="leading-relaxed">
+            <b>익명으로 올라가요.</b> 닉네임 대신 &lsquo;익명&rsquo;으로 보이고, 다른 회원은 누가 썼는지 알 수 없어요.
+            <span className="block text-muted-foreground">
+              규칙을 어긴 글은 관리자가 작성자를 확인해 조치할 수 있어요. 익명 글에는 사진을 올릴 수 없어요.
+            </span>
+          </p>
+        </div>
+      )}
+
       <input
         name="title"
         required
@@ -95,7 +110,7 @@ export function PostForm({ action, slug, userId, post, isGallery }: Props) {
         className={`${inputClass} resize-y leading-relaxed`}
       />
 
-      {!isEdit && (
+      {!isEdit && !isAnonymous && (
         <label className="block space-y-2 rounded-xl border border-dashed border-border bg-muted/40 p-4 text-sm">
           <span className="font-medium">
             사진 첨부{isGallery ? " (필수)" : ""}{" "}

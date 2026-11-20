@@ -23,3 +23,17 @@ export function readQuery(value: string | string[] | undefined) {
 export function likePattern(query: string) {
   return `%${query.replace(/[%_\\]/g, "")}%`;
 }
+
+type Nick = { nickname: string } | null;
+type AnonOwner = { user: Nick } | { user: Nick }[] | null | undefined;
+
+/** 관리자 화면 전용: 익명 글/댓글이면 실제 작성자 닉네임을 괄호로 함께 보여 줘요. */
+export function adminAuthorName(author: Nick | undefined, owner: AnonOwner) {
+  const anonymous = Array.isArray(owner) ? owner[0] : owner;
+  if (anonymous) return `익명 (${anonymous.user?.nickname ?? "탈퇴회원"})`;
+  return author?.nickname ?? "탈퇴회원";
+}
+
+/** 위 함수에 쓰는 select 조각 */
+export const POST_OWNER = "owner:anonymous_owners!anonymous_owners_post_id_fkey(user:profiles(nickname))";
+export const COMMENT_OWNER = "owner:anonymous_owners!anonymous_owners_comment_id_fkey(user:profiles(nickname))";

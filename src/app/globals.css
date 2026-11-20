@@ -210,6 +210,7 @@ body {
   font-family: var(--font-sans);
 }
 .guide-mascot svg,
+.guide-face svg,
 .guide-popover-face svg {
   display: block;
   width: 100%;

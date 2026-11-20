@@ -1,7 +1,7 @@
 import type { DriveStep } from "driver.js";
 
 /** 지금 보고 있는 페이지 종류 */
-export type PageKind = "home" | "board" | "gallery" | "post" | "write" | "login" | "signup" | "admin" | "other";
+export type PageKind = "home" | "board" | "gallery" | "anonymous" | "post" | "write" | "login" | "signup" | "admin" | "other";
 
 export function pageKind(pathname: string): PageKind {
   if (pathname === "/") return "home";
@@ -12,6 +12,7 @@ export function pageKind(pathname: string): PageKind {
   if (/^\/b\/[^/]+\/\d+$/.test(pathname)) return "post";
   if (/^\/b\/[^/]+$/.test(pathname)) {
     // 갤러리 게시판인지는 화면에 붙은 표시로 알아냅니다.
+    if (document.querySelector('[data-board-type="anonymous"]')) return "anonymous";
     return document.querySelector('[data-board-type="gallery"]') ? "gallery" : "board";
   }
   return "other";
@@ -22,6 +23,8 @@ export const tips: Record<PageKind, string> = {
   home: "안녕하세요! 저는 안내 도우미 뭉치예요. 여기서 인기글과 최신글을 한눈에 볼 수 있어요. 처음이라면 '둘러보기'를 눌러 보세요!",
   board: "이 게시판의 글 목록이에요. 오른쪽 위 '글쓰기'로 새 글을 올리고, 아래 검색창으로 제목을 찾을 수 있어요.",
   gallery: "사진갤러리예요! 사진을 눌러 크게 보고, '글쓰기'로 내 사진도 자랑해 보세요.",
+  anonymous:
+    "여기는 익명 고민상담소예요. 닉네임 대신 '익명'으로 보여서 아무도 누가 썼는지 몰라요. 편하게 털어놓고, 다른 분 고민엔 따뜻한 댓글을 남겨 주세요!",
   post: "글이 마음에 들면 '추천'을 눌러 주세요. 추천을 많이 받으면 홈의 인기글에 올라가요!",
   write: "제목과 내용을 쓰고, 필요하면 사진도 붙일 수 있어요. 다 쓰면 '등록'을 눌러 주세요.",
   login: "가입할 때 쓴 이메일과 비밀번호로 로그인해요. 아직 회원이 아니라면 아래 '회원가입'을 눌러 주세요.",
@@ -33,7 +36,7 @@ export const tips: Record<PageKind, string> = {
 /** 둘러보기 단계: 화면에 있는 것만 골라서 보여 줍니다. */
 const allSteps: (DriveStep & { pages: PageKind[] })[] = [
   {
-    pages: ["home", "board", "gallery", "post"],
+    pages: ["home", "board", "gallery", "anonymous", "post"],
     element: '[data-tour="boards"]',
     popover: { title: "게시판 메뉴", description: "여기서 자유게시판, 유머게시판, 사진갤러리를 오갈 수 있어요." },
   },
@@ -43,7 +46,7 @@ const allSteps: (DriveStep & { pages: PageKind[] })[] = [
     popover: { side: "top", title: "인기글 · 최신글", description: "추천을 많이 받은 글과 방금 올라온 글이 모여 있어요." },
   },
   {
-    pages: ["home", "board", "gallery"],
+    pages: ["home", "board", "gallery", "anonymous"],
     element: '[data-tour="write"]',
     popover: { side: "bottom", title: "글쓰기", description: "누르면 바로 새 글을 쓸 수 있어요. 글을 쓰려면 로그인이 필요해요." },
   },
@@ -53,7 +56,7 @@ const allSteps: (DriveStep & { pages: PageKind[] })[] = [
     popover: { title: "사진갤러리", description: "사진을 올리고 구경하는 곳이에요. 사진이 큼직하게 모여 보여요." },
   },
   {
-    pages: ["board", "gallery"],
+    pages: ["board", "gallery", "anonymous"],
     element: '[data-tour="search"]',
     popover: { title: "검색", description: "찾고 싶은 글의 제목을 넣어 보세요." },
   },
@@ -73,12 +76,12 @@ const allSteps: (DriveStep & { pages: PageKind[] })[] = [
     popover: { side: "top", title: "글 쓰는 곳", description: "제목, 내용, 사진을 넣고 '등록'을 누르면 끝이에요." },
   },
   {
-    pages: ["home", "board", "gallery", "post", "write", "other"],
+    pages: ["home", "board", "gallery", "anonymous", "post", "write", "other"],
     element: '[data-tour="signup"]',
     popover: { title: "회원가입", description: "가입하면 글쓰기, 댓글, 추천을 모두 할 수 있어요. 1분이면 끝나요!" },
   },
   {
-    pages: ["home", "board", "gallery", "post", "write", "login", "signup", "admin", "other"],
+    pages: ["home", "board", "gallery", "anonymous", "post", "write", "login", "signup", "admin", "other"],
     element: '[data-tour="theme"]',
     popover: { title: "밤에는 어둡게", description: "눈이 부시면 이 버튼으로 어두운 화면으로 바꿀 수 있어요." },
   },
