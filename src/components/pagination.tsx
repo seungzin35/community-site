@@ -1,3 +1,4 @@
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import Link from "next/link";
 
 type Props = {
@@ -24,33 +25,29 @@ export function Pagination({ basePath, page, totalPages, query, params: extra }:
   const start = Math.floor((page - 1) / 10) * 10 + 1;
   const end = Math.min(start + 9, totalPages);
   const pages = Array.from({ length: end - start + 1 }, (_, index) => start + index);
-  const linkClass = "rounded-md px-2.5 py-1 hover:bg-muted";
+  const cell = "grid h-9 min-w-9 place-items-center rounded-lg px-2 tabular-nums transition-colors";
 
   return (
     <nav aria-label="페이지" className="flex flex-wrap justify-center gap-1 text-sm">
       {start > 1 && (
-        <Link href={href(start - 1)} className={linkClass}>
-          이전
+        <Link href={href(start - 1)} className={`${cell} text-muted-foreground hover:bg-surface`} aria-label="이전">
+          <ChevronLeft className="size-4" />
         </Link>
       )}
       {pages.map((target) =>
         target === page ? (
-          <span
-            key={target}
-            aria-current="page"
-            className="rounded-md bg-primary px-2.5 py-1 font-medium text-primary-foreground"
-          >
+          <span key={target} aria-current="page" className={`${cell} bg-primary font-bold text-primary-foreground`}>
             {target}
           </span>
         ) : (
-          <Link key={target} href={href(target)} className={linkClass}>
+          <Link key={target} href={href(target)} className={`${cell} text-muted-foreground hover:bg-surface hover:text-foreground`}>
             {target}
           </Link>
         ),
       )}
       {end < totalPages && (
-        <Link href={href(end + 1)} className={linkClass}>
-          다음
+        <Link href={href(end + 1)} className={`${cell} text-muted-foreground hover:bg-surface`} aria-label="다음">
+          <ChevronRight className="size-4" />
         </Link>
       )}
     </nav>

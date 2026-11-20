@@ -2,33 +2,27 @@ import Link from "next/link";
 import { Suspense } from "react";
 import type { Board } from "@/lib/boards";
 import { site } from "@/lib/site";
+import { BoardNav } from "./board-nav";
+import { Logo } from "./logo";
+import { ThemeToggle } from "./theme-toggle";
 import { UserMenu, UserMenuFallback } from "./user-menu";
 
 export function SiteHeader({ boards }: { boards: Board[] }) {
   return (
-    <header className="border-b border-border bg-surface">
-      <div className="mx-auto flex h-14 max-w-5xl items-center justify-between px-4">
-        <Link href="/" className="text-lg font-bold text-primary">
+    <header className="sticky top-0 z-30 border-b border-border bg-surface/80 backdrop-blur-xl">
+      <div className="mx-auto flex h-14 max-w-6xl items-center justify-between gap-3 px-4">
+        <Link href="/" className="flex items-center gap-2 text-[17px] font-extrabold tracking-tight">
+          <Logo />
           {site.name}
         </Link>
-        <Suspense fallback={<UserMenuFallback />}>
-          <UserMenu />
-        </Suspense>
+        <div className="flex items-center gap-1">
+          <ThemeToggle />
+          <Suspense fallback={<UserMenuFallback />}>
+            <UserMenu />
+          </Suspense>
+        </div>
       </div>
-      <nav className="border-t border-border">
-        <ul className="mx-auto flex max-w-5xl gap-1 overflow-x-auto px-2 text-sm">
-          {boards.map((board) => (
-            <li key={board.id}>
-              <Link
-                href={`/b/${board.slug}`}
-                className="block whitespace-nowrap px-3 py-2.5 hover:text-primary"
-              >
-                {board.name}
-              </Link>
-            </li>
-          ))}
-        </ul>
-      </nav>
+      <BoardNav boards={boards} />
     </header>
   );
 }

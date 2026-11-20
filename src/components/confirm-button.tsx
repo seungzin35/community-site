@@ -20,7 +20,7 @@ export function ConfirmButton({ children, confirm, danger, className = "" }: Pro
       onClick={(event) => {
         if (confirm && !window.confirm(confirm)) event.preventDefault();
       }}
-      className={`rounded-md border border-border bg-surface px-2.5 py-1 text-xs hover:bg-muted disabled:opacity-60 ${
+      className={`btn btn-outline rounded-lg px-2.5 py-1 text-xs font-medium ${
         danger ? "text-red-600 dark:text-red-400" : ""
       } ${className}`}
     >

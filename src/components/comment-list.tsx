@@ -1,4 +1,6 @@
+import { CornerDownRight } from "lucide-react";
 import Link from "next/link";
+import { Avatar } from "./avatar";
 import { deleteComment } from "@/app/b/actions";
 import type { CurrentUser } from "@/lib/auth";
 import { formatFullDate } from "@/lib/format";
@@ -14,9 +16,12 @@ export function CommentList({ comments, slug, postId, user }: Props) {
   const canWrite = user && !user.isBanned;
 
   const item = (comment: Comment, isReply: boolean) => (
-    <div className={isReply ? "ml-6 border-l-2 border-border pl-3" : ""}>
+    <div className={`flex gap-3 ${isReply ? "ml-6 rounded-xl bg-muted/60 p-3 sm:ml-12" : ""}`}>
+      {isReply && <CornerDownRight className="mt-1 size-4 shrink-0 text-muted-foreground" />}
+      <Avatar name={comment.author?.nickname} size="sm" />
+      <div className="min-w-0 flex-1">
       <div className="flex items-center gap-2 text-xs text-muted-foreground">
-        <span className="text-sm font-medium text-foreground">
+        <span className="text-sm font-semibold text-foreground">
           {comment.author?.nickname ?? "탈퇴회원"}
         </span>
         <span>{formatFullDate(comment.created_at)}</span>
@@ -30,21 +35,24 @@ export function CommentList({ comments, slug, postId, user }: Props) {
             <input type="hidden" name="slug" value={slug} />
             <input type="hidden" name="postId" value={postId} />
             <input type="hidden" name="commentId" value={comment.id} />
-            <button type="submit" className="hover:text-foreground">
+            <button type="submit" className="hover:text-red-600 dark:hover:text-red-400">
               삭제
             </button>
           </form>
         )}
       </div>
-      <p className="mt-1 whitespace-pre-wrap break-words text-sm">{comment.content}</p>
+      <p className="mt-1 whitespace-pre-wrap break-words text-[15px] leading-relaxed">{comment.content}</p>
+      </div>
     </div>
   );
 
   return (
-    <section className="rounded-lg border border-border bg-surface p-4">
-      <h2 className="mb-3 text-sm font-bold">댓글 {comments.length}</h2>
+    <section className="card p-5 sm:p-6">
+      <h2 className="mb-4 flex items-center gap-1.5 text-base font-bold">
+        댓글 <span className="text-primary">{comments.length}</span>
+      </h2>
 
-      <ul className="space-y-4">
+      <ul className="space-y-5">
         {roots.map((comment) => (
           <li key={comment.id} className="space-y-3">
             {item(comment, false)}
@@ -52,8 +60,8 @@ export function CommentList({ comments, slug, postId, user }: Props) {
               <div key={reply.id}>{item(reply, true)}</div>
             ))}
             {canWrite && (
-              <details className="ml-6 text-xs text-muted-foreground">
-                <summary className="cursor-pointer hover:text-foreground">답글 쓰기</summary>
+              <details className="ml-10 text-xs text-muted-foreground">
+                <summary className="w-fit cursor-pointer list-none font-medium hover:text-primary">답글 쓰기</summary>
                 <div className="mt-2">
                   <CommentForm
                     slug={slug}
@@ -68,7 +76,7 @@ export function CommentList({ comments, slug, postId, user }: Props) {
         ))}
       </ul>
 
-      <div className={comments.length ? "mt-5 border-t border-border pt-4" : ""}>
+      <div className={comments.length ? "mt-6 border-t border-border pt-5" : ""}>
         {canWrite ? (
           <CommentForm slug={slug} postId={postId} />
         ) : user ? (
