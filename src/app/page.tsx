@@ -1,4 +1,4 @@
-import { ChevronRight, Clock, Flame, Images, MessageSquare, PenLine } from "lucide-react";
+import { ChevronRight, Clock, Flame, HeartHandshake, Images, MessageSquare, PenLine } from "lucide-react";
 import Link from "next/link";
 import { connection } from "next/server";
 import { Suspense } from "react";
@@ -31,12 +31,12 @@ async function Feeds() {
   return (
     <>
       {popular.length > 0 && (
-        <section>
+        <section data-tour="feeds">
           <SectionTitle icon={<Flame className="size-4" />} title="인기글" tone="hot" />
           <PostTable posts={popular} compact />
         </section>
       )}
-      <section>
+      <section data-tour={popular.length > 0 ? undefined : "feeds"}>
         <SectionTitle icon={<Clock className="size-4" />} title="최신글" tone="primary" />
         <PostTable posts={recent} compact />
       </section>
@@ -82,7 +82,7 @@ export default async function HomePage() {
           <p className="mt-3 text-sm text-white/80 sm:text-base">{site.description}</p>
           {firstBoard && (
             <div className="mt-6 flex flex-wrap gap-2">
-              <Link href={`/b/${firstBoard.slug}/write`} className="btn bg-white text-[#4b4bc8] hover:bg-white/90">
+              <Link href={`/b/${firstBoard.slug}/write`} data-tour="write" className="btn bg-white text-[#4b4bc8] hover:bg-white/90">
                 <PenLine className="size-4" /> 글쓰기
               </Link>
               <Link href={`/b/${firstBoard.slug}`} className="btn bg-white/15 text-white hover:bg-white/25">
@@ -113,7 +113,13 @@ export default async function HomePage() {
                     className="group flex items-center gap-3 rounded-xl px-3 py-2.5 transition-colors hover:bg-muted"
                   >
                     <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-primary-soft text-primary">
-                      {board.type === "gallery" ? <Images className="size-[18px]" /> : <MessageSquare className="size-[18px]" />}
+                      {board.is_anonymous ? (
+                        <HeartHandshake className="size-[18px]" />
+                      ) : board.type === "gallery" ? (
+                        <Images className="size-[18px]" />
+                      ) : (
+                        <MessageSquare className="size-[18px]" />
+                      )}
                     </span>
                     <span className="min-w-0 flex-1">
                       <span className="block truncate text-sm font-semibold">{board.name}</span>

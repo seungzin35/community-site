@@ -18,7 +18,7 @@ export async function UserMenu() {
         <Link href="/login" className="btn btn-ghost">
           로그인
         </Link>
-        <Link href="/signup" className="btn btn-primary">
+        <Link href="/signup" className="btn btn-primary" data-tour="signup">
           회원가입
         </Link>
       </div>

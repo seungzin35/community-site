@@ -15,12 +15,14 @@ export type PostListItem = {
   like_count: number;
   comment_count: number;
   created_at: string;
+  /** 익명 게시판 글이면 true (author 는 비어 있어요) */
+  is_anonymous: boolean;
   author: { nickname: string } | null;
 };
 
 export type PostDetail = PostListItem & {
   board_id: number;
-  author_id: string;
+  author_id: string | null;
   content: string;
   dislike_count: number;
   images: { id: number; storage_path: string }[];
@@ -28,15 +30,30 @@ export type PostDetail = PostListItem & {
 
 export type Comment = {
   id: number;
-  author_id: string;
+  author_id: string | null;
   parent_id: number | null;
+  /** 익명 댓글 번호: null 이면 닉네임, 0 은 글쓴이, 1 이상은 익명1, 익명2 ... */
+  anon_label: number | null;
   content: string;
   created_at: string;
   author: { nickname: string } | null;
 };
 
 const LIST_COLUMNS =
-  "id, title, thumbnail_path, is_notice, view_count, like_count, comment_count, created_at, author:profiles!posts_author_id_fkey(nickname)";
+  "id, title, thumbnail_path, is_notice, is_anonymous, view_count, like_count, comment_count, created_at, author:profiles!posts_author_id_fkey(nickname)";
+
+/** 글쓴이 이름: 익명 글은 '익명', 탈퇴한 회원은 '탈퇴회원' */
+export function authorName(post: { is_anonymous?: boolean; author: { nickname: string } | null }) {
+  if (post.is_anonymous) return "익명";
+  return post.author?.nickname ?? "탈퇴회원";
+}
+
+/** 댓글 쓴이 이름 */
+export function commenterName(comment: Pick<Comment, "anon_label" | "author">) {
+  if (comment.anon_label === 0) return "글쓴이";
+  if (comment.anon_label) return `익명${comment.anon_label}`;
+  return comment.author?.nickname ?? "탈퇴회원";
+}
 
 export function imageUrl(path: string) {
   return `${supabaseUrl}/storage/v1/object/public/${IMAGE_BUCKET}/${path}`;
@@ -46,7 +63,7 @@ export async function getBoardBySlug(slug: string): Promise<Board | null> {
   const supabase = createPublicClient();
   const { data } = await supabase
     .from("boards")
-    .select("id, slug, name, description, type")
+    .select("id, slug, name, description, type, is_anonymous")
     .eq("slug", slug)
     .eq("is_active", true)
     .maybeSingle();
@@ -135,8 +152,36 @@ export async function getComments(postId: number): Promise<Comment[]> {
   const supabase = createPublicClient();
   const { data } = await supabase
     .from("comments")
-    .select("id, author_id, parent_id, content, created_at, author:profiles!comments_author_id_fkey(nickname)")
+    .select(
+      "id, author_id, parent_id, anon_label, content, created_at, author:profiles!comments_author_id_fkey(nickname)",
+    )
     .eq("post_id", postId)
     .order("created_at");
   return (data ?? []) as unknown as Comment[];
+}
+
+/**
+ * 익명 글/댓글 중 내가 쓴 것 (본인만 읽을 수 있는 표에서 확인).
+ * 로그인한 회원의 권한으로 읽어야 하므로 화면마다 새로 불러옵니다.
+ */
+export async function getMyAnonymous(
+  supabase: Awaited<ReturnType<typeof import("./supabase/server").createClient>>,
+  userId: string | undefined,
+  postId: number,
+  commentIds: number[],
+) {
+  const mine = { post: false, comments: new Set<number>() };
+  if (!userId) return mine;
+  const filters = [`post_id.eq.${postId}`];
+  if (commentIds.length) filters.push(`comment_id.in.(${commentIds.join(",")})`);
+  const { data } = await supabase
+    .from("anonymous_owners")
+    .select("post_id, comment_id")
+    .eq("user_id", userId)
+    .or(filters.join(","));
+  for (const row of data ?? []) {
+    if (row.post_id === postId) mine.post = true;
+    if (row.comment_id) mine.comments.add(row.comment_id);
+  }
+  return mine;
 }

@@ -11,6 +11,7 @@ export type BoardRow = {
   type: "normal" | "gallery";
   sort_order: number;
   is_active: boolean;
+  is_anonymous: boolean;
 };
 
 const input = "field py-1.5";
@@ -20,7 +21,7 @@ export function BoardForm({ board, nextOrder = 0 }: { board?: BoardRow; nextOrde
   const [state, action, pending] = useActionState(saveBoard, undefined);
 
   return (
-    <form action={action} className="grid gap-2 sm:grid-cols-[1fr_1fr_2fr_auto_auto_auto_auto] sm:items-end">
+    <form action={action} className="grid gap-2 sm:grid-cols-[1fr_1fr_2fr_auto_auto_auto_auto_auto] sm:items-end">
       {board && <input type="hidden" name="id" value={board.id} />}
       <label className="space-y-1 text-xs text-muted-foreground">
         <span>이름</span>
@@ -62,6 +63,13 @@ export function BoardForm({ board, nextOrder = 0 }: { board?: BoardRow; nextOrde
         <input name="is_active" type="checkbox" defaultChecked={board?.is_active ?? true} />
         <span>보이기</span>
       </label>
+      <label
+        className="flex items-center gap-1.5 pb-2 text-xs"
+        title="글쓴이가 '익명'으로 보여요. 사진은 올릴 수 없어요. 이미 쓴 글은 그대로예요."
+      >
+        <input name="is_anonymous" type="checkbox" defaultChecked={board?.is_anonymous ?? false} />
+        <span>익명</span>
+      </label>
       <button
         type="submit"
         disabled={pending}
@@ -72,7 +80,7 @@ export function BoardForm({ board, nextOrder = 0 }: { board?: BoardRow; nextOrde
       {(state?.error || state?.message) && (
         <p
           role={state.error ? "alert" : "status"}
-          className={`text-xs sm:col-span-7 ${state.error ? "text-red-600 dark:text-red-400" : "text-muted-foreground"}`}
+          className={`text-xs sm:col-span-8 ${state.error ? "text-red-600 dark:text-red-400" : "text-muted-foreground"}`}
         >
           {state.error ?? state.message}
         </p>

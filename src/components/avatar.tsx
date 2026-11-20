@@ -1,3 +1,5 @@
+import { mascotSvg } from "./guide/mascot";
+
 const colors = [
   "bg-[#e0e7ff] text-[#4338ca] dark:bg-[#272a5c] dark:text-[#c7d2fe]",
   "bg-[#fce7f3] text-[#be185d] dark:bg-[#4a1d36] dark:text-[#fbcfe8]",
@@ -8,10 +10,28 @@ const colors = [
 ];
 
 /** 닉네임 첫 글자로 만든 동그란 프로필. 닉네임마다 색이 정해져 있어요. */
-export function Avatar({ name, size = "md" }: { name?: string | null; size?: "sm" | "md" }) {
+export function Avatar({
+  name,
+  size = "md",
+  anonymous = false,
+}: {
+  name?: string | null;
+  size?: "sm" | "md";
+  /** 익명이면 뭉치 얼굴을 보여 줘요. */
+  anonymous?: boolean;
+}) {
+  const sizes = { sm: "size-7 text-xs", md: "size-9 text-sm" };
+  if (anonymous) {
+    return (
+      <span
+        aria-hidden
+        className={`guide-face block shrink-0 rounded-full bg-primary-soft p-0.5 ${sizes[size]}`}
+        dangerouslySetInnerHTML={{ __html: mascotSvg }}
+      />
+    );
+  }
   const label = name ?? "?";
   const hash = [...label].reduce((sum, char) => sum + char.charCodeAt(0), 0);
-  const sizes = { sm: "size-7 text-xs", md: "size-9 text-sm" };
   return (
     <span
       aria-hidden
