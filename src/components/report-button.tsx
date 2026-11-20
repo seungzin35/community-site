@@ -1,5 +1,6 @@
 "use client";
 
+import { Flag } from "lucide-react";
 import { useActionState } from "react";
 import { reportContent } from "@/app/b/actions";
 
@@ -15,10 +16,12 @@ export function ReportButton({ postId, commentId }: Props) {
 
   return (
     <details className="group relative text-xs text-muted-foreground">
-      <summary className="cursor-pointer list-none hover:text-foreground">신고</summary>
+      <summary className="inline-flex cursor-pointer list-none items-center gap-1 rounded-md px-1.5 py-1 hover:bg-muted hover:text-red-600 dark:hover:text-red-400">
+        <Flag className="size-3" /> 신고
+      </summary>
       <form
         action={action}
-        className="absolute right-0 z-10 mt-1 w-64 space-y-2 rounded-md border border-border bg-surface p-3 shadow-lg"
+        className="card absolute right-0 z-20 mt-1 w-64 space-y-2 p-3 shadow-xl"
       >
         {postId && <input type="hidden" name="postId" value={postId} />}
         {commentId && <input type="hidden" name="commentId" value={commentId} />}
@@ -29,7 +32,7 @@ export function ReportButton({ postId, commentId }: Props) {
           rows={3}
           placeholder="신고 이유를 적어 주세요."
           aria-label="신고 이유"
-          className="w-full rounded-md border border-border bg-surface px-2 py-1.5 text-sm text-foreground outline-none focus:border-primary"
+          className="field text-foreground"
         />
         {state?.error && (
           <p role="alert" className="text-red-600 dark:text-red-400">
@@ -39,7 +42,7 @@ export function ReportButton({ postId, commentId }: Props) {
         <button
           type="submit"
           disabled={pending}
-          className="w-full rounded-md bg-red-600 px-3 py-1.5 font-medium text-white hover:opacity-90 disabled:opacity-60"
+          className="btn w-full bg-red-600 text-white hover:bg-red-700"
         >
           {pending ? "보내는 중..." : "신고하기"}
         </button>

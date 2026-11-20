@@ -28,7 +28,7 @@ export function CommentForm({ slug, postId, parentId, placeholder = "댓글을 �
         maxLength={2000}
         placeholder={placeholder}
         aria-label="댓글"
-        className="w-full rounded-md border border-border bg-surface px-3 py-2 text-sm outline-none focus:border-primary"
+        className="field resize-y"
       />
       <div className="flex items-center justify-end gap-3">
         {state?.error && (
@@ -39,7 +39,7 @@ export function CommentForm({ slug, postId, parentId, placeholder = "댓글을 �
         <button
           type="submit"
           disabled={pending}
-          className="rounded-md bg-primary px-4 py-1.5 text-sm font-medium text-primary-foreground hover:opacity-90 disabled:opacity-60"
+          className="btn btn-primary"
         >
           {pending ? "등록 중..." : "등록"}
         </button>

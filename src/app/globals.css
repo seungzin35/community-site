@@ -1,28 +1,42 @@
 @import "tailwindcss";
 
+/*
+ * 색상표
+ * - 기본 회색은 shadcn/ui(MIT)의 zinc 계열, 강조색은 Radix Colors(MIT)의 iris 계열을 참고했습니다.
+ * - 다크 모드는 화면 오른쪽 위 버튼(html.dark)으로 바꾸고, 처음엔 기기 설정을 따릅니다.
+ */
 :root {
-  --background: #f4f5f7;
+  --background: #f6f6f8;
   --surface: #ffffff;
-  --foreground: #1a1d23;
-  --muted: #eef0f3;
-  --muted-foreground: #6b7280;
-  --border: #e2e5ea;
-  --primary: #2563eb;
+  --foreground: #18181b;
+  --muted: #f1f1f4;
+  --muted-foreground: #71717a;
+  --border: #e6e6ea;
+  --primary: #5b5bd6;
   --primary-foreground: #ffffff;
+  --primary-soft: #eef0ff;
+  --hot: #e5484d;
+  --hot-soft: #feebec;
+  color-scheme: light;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0f1115;
-    --surface: #181b21;
-    --foreground: #e6e8ec;
-    --muted: #22262e;
-    --muted-foreground: #9aa1ad;
-    --border: #2a2f38;
-    --primary: #5b8cff;
-    --primary-foreground: #0f1115;
-  }
+.dark {
+  --background: #0c0c10;
+  --surface: #15151a;
+  --foreground: #ececef;
+  --muted: #1e1e24;
+  --muted-foreground: #a1a1aa;
+  --border: #27272e;
+  --primary: #8b8cf6;
+  --primary-foreground: #0c0c10;
+  --primary-soft: #1f2040;
+  --hot: #ff6369;
+  --hot-soft: #3b1219;
+  color-scheme: dark;
 }
+
+/* dark: 는 html 에 붙는 .dark 클래스를 따릅니다. */
+@custom-variant dark (&:where(.dark, .dark *));
 
 @theme inline {
   --color-background: var(--background);
@@ -33,12 +47,103 @@
   --color-border: var(--border);
   --color-primary: var(--primary);
   --color-primary-foreground: var(--primary-foreground);
+  --color-primary-soft: var(--primary-soft);
+  --color-hot: var(--hot);
+  --color-hot-soft: var(--hot-soft);
+  --font-sans:
+    "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo",
+    "Malgun Gothic", "Noto Sans KR", system-ui, sans-serif;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family:
-    "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo",
-    "Malgun Gothic", "Noto Sans KR", system-ui, sans-serif;
+  font-family: var(--font-sans);
+  letter-spacing: -0.01em;
+  -webkit-tap-highlight-color: transparent;
+}
+
+::selection {
+  background: var(--primary-soft);
+}
+
+/* 공통 모양: 카드, 버튼, 입력칸 */
+@utility card {
+  border: 1px solid var(--border);
+  background: var(--surface);
+  border-radius: 1rem;
+  box-shadow: 0 1px 2px rgb(0 0 0 / 0.03);
+}
+
+@utility btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.375rem;
+  border-radius: 0.625rem;
+  padding: 0.5rem 0.875rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  line-height: 1.25rem;
+  white-space: nowrap;
+  transition:
+    background-color 0.15s,
+    border-color 0.15s,
+    color 0.15s,
+    opacity 0.15s;
+  &:disabled {
+    opacity: 0.6;
+    pointer-events: none;
+  }
+}
+
+@utility btn-primary {
+  background: var(--primary);
+  color: var(--primary-foreground);
+  &:hover {
+    opacity: 0.9;
+  }
+}
+
+@utility btn-outline {
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--foreground);
+  &:hover {
+    background: var(--muted);
+  }
+}
+
+@utility btn-ghost {
+  color: var(--foreground);
+  &:hover {
+    background: var(--muted);
+  }
+}
+
+@utility field {
+  width: 100%;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  border-radius: 0.625rem;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.875rem;
+  outline: none;
+  transition:
+    border-color 0.15s,
+    box-shadow 0.15s;
+  &::placeholder {
+    color: var(--muted-foreground);
+  }
+  &:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px var(--primary-soft);
+  }
+}
+
+@utility no-scrollbar {
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
 }

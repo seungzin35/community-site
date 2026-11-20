@@ -1,5 +1,8 @@
 import type { Metadata } from "next";
+import Link from "next/link";
+import { Logo } from "@/components/logo";
 import { SiteHeader } from "@/components/site-header";
+import { themeScript } from "@/components/theme-toggle";
 import { getBoards } from "@/lib/boards";
 import { site } from "@/lib/site";
 import "./globals.css";
@@ -13,12 +16,27 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
   const boards = await getBoards();
 
   return (
-    <html lang="ko" className="h-full antialiased">
+    <html lang="ko" className="h-full antialiased" suppressHydrationWarning>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: themeScript }} />
+        {/* 한글 글꼴 Pretendard (SIL OFL) */}
+        <link
+          rel="stylesheet"
+          href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css"
+        />
+      </head>
       <body className="flex min-h-full flex-col">
         <SiteHeader boards={boards} />
-        <main className="mx-auto w-full max-w-5xl flex-1 px-4 py-6">{children}</main>
-        <footer className="border-t border-border py-6 text-center text-xs text-muted-foreground">
-          © {site.name}
+        <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-6 sm:py-8">{children}</main>
+        <footer className="border-t border-border bg-surface">
+          <div className="mx-auto flex max-w-6xl flex-col gap-3 px-4 py-8 text-sm text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
+            <Link href="/" className="flex items-center gap-2 font-bold text-foreground">
+              <Logo className="size-6" />
+              {site.name}
+            </Link>
+            <p>{site.description}</p>
+            <p className="text-xs">© {site.name}. All rights reserved.</p>
+          </div>
         </footer>
       </body>
     </html>

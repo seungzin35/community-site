@@ -15,8 +15,7 @@ type Props = {
 };
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024;
-const inputClass =
-  "w-full rounded-md border border-border bg-surface px-3 py-2 text-sm outline-none focus:border-primary";
+const inputClass = "field";
 
 export function PostForm({ action, slug, userId, post, isGallery }: Props) {
   const [files, setFiles] = useState<File[]>([]);
@@ -73,7 +72,7 @@ export function PostForm({ action, slug, userId, post, isGallery }: Props) {
   }
 
   return (
-    <form onSubmit={onSubmit} className="space-y-4 rounded-lg border border-border bg-surface p-4">
+    <form onSubmit={onSubmit} className="card space-y-4 p-4 sm:p-6">
       <input type="hidden" name="slug" value={slug} />
       {post && <input type="hidden" name="postId" value={post.id} />}
 
@@ -84,7 +83,7 @@ export function PostForm({ action, slug, userId, post, isGallery }: Props) {
         defaultValue={post?.title}
         placeholder="제목"
         aria-label="제목"
-        className={inputClass}
+        className={`${inputClass} py-2.5 text-base font-semibold`}
       />
       <textarea
         name="content"
@@ -93,12 +92,12 @@ export function PostForm({ action, slug, userId, post, isGallery }: Props) {
         defaultValue={post?.content}
         placeholder="내용을 입력해 주세요."
         aria-label="내용"
-        className={inputClass}
+        className={`${inputClass} resize-y leading-relaxed`}
       />
 
       {!isEdit && (
-        <label className="block space-y-1 text-sm">
-          <span>
+        <label className="block space-y-2 rounded-xl border border-dashed border-border bg-muted/40 p-4 text-sm">
+          <span className="font-medium">
             사진 첨부{isGallery ? " (필수)" : ""}{" "}
             <span className="text-muted-foreground">최대 {MAX_IMAGES}장, 한 장에 5MB 이하</span>
           </span>
@@ -108,7 +107,7 @@ export function PostForm({ action, slug, userId, post, isGallery }: Props) {
             multiple
             accept="image/jpeg,image/png,image/webp,image/gif"
             onChange={onFilesChange}
-            className="block w-full text-sm file:mr-3 file:rounded-md file:border-0 file:bg-muted file:px-3 file:py-1.5"
+            className="block w-full text-sm text-muted-foreground file:mr-3 file:cursor-pointer file:rounded-lg file:border-0 file:bg-primary-soft file:px-3 file:py-1.5 file:font-semibold file:text-primary"
           />
         </label>
       )}
@@ -123,7 +122,7 @@ export function PostForm({ action, slug, userId, post, isGallery }: Props) {
         <button
           type="submit"
           disabled={pending}
-          className="rounded-md bg-primary px-5 py-2 text-sm font-medium text-primary-foreground hover:opacity-90 disabled:opacity-60"
+          className="btn btn-primary px-6"
         >
           {pending ? "등록 중..." : isEdit ? "수정" : "등록"}
         </button>

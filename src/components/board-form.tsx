@@ -13,8 +13,7 @@ export type BoardRow = {
   is_active: boolean;
 };
 
-const input =
-  "w-full rounded-md border border-border bg-surface px-2.5 py-1.5 text-sm outline-none focus:border-primary";
+const input = "field py-1.5";
 
 /** 게시판 추가(board 없음) 또는 수정(board 있음) */
 export function BoardForm({ board, nextOrder = 0 }: { board?: BoardRow; nextOrder?: number }) {
@@ -66,7 +65,7 @@ export function BoardForm({ board, nextOrder = 0 }: { board?: BoardRow; nextOrde
       <button
         type="submit"
         disabled={pending}
-        className="rounded-md bg-primary px-4 py-1.5 text-sm font-medium text-primary-foreground hover:opacity-90 disabled:opacity-60"
+        className="btn btn-primary py-1.5"
       >
         {pending ? "저장 중..." : board ? "저장" : "추가"}
       </button>

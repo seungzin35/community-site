@@ -22,15 +22,17 @@ export default async function WritePage({ params }: PageProps<"/b/[slug]/write">
 
   if (user.isBanned) {
     return (
-      <p className="rounded-lg border border-border bg-surface px-4 py-10 text-center text-sm">
+      <p className="card px-4 py-12 text-center text-sm">
         활동이 정지된 계정이라 글을 쓸 수 없어요.
       </p>
     );
   }
 
   return (
-    <div className="space-y-4">
-      <h1 className="text-lg font-bold">{board.name} 글쓰기</h1>
+    <div className="mx-auto max-w-3xl space-y-4">
+      <h1 className="text-xl font-extrabold tracking-tight">
+        <span className="text-primary">{board.name}</span> 글쓰기
+      </h1>
       <PostForm action={createPost} slug={slug} userId={user.id} isGallery={board.type === "gallery"} />
     </div>
   );

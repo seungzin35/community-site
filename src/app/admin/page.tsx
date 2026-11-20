@@ -39,12 +39,10 @@ export default async function AdminHome() {
           <Link
             key={card.label}
             href={card.href}
-            className={`rounded-lg border bg-surface p-4 hover:border-primary ${
-              card.alert ? "border-red-400" : "border-border"
-            }`}
+            className={`card p-4 transition-colors hover:border-primary sm:p-5 ${card.alert ? "border-red-400 dark:border-red-500/60" : ""}`}
           >
-            <p className="text-xs text-muted-foreground">{card.label}</p>
-            <p className={`mt-1 text-2xl font-bold ${card.alert ? "text-red-600 dark:text-red-400" : ""}`}>
+            <p className="text-xs font-medium text-muted-foreground">{card.label}</p>
+            <p className={`mt-1 text-3xl font-extrabold tabular-nums ${card.alert ? "text-red-600 dark:text-red-400" : ""}`}>
               {card.value.toLocaleString()}
             </p>
             {card.note && <p className="mt-0.5 text-xs text-muted-foreground">{card.note}</p>}
