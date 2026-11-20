@@ -192,8 +192,9 @@ returns trigger
 language plpgsql security definer set search_path = ''
 as $$
 begin
-  if pg_trigger_depth() > 1 then
-    return new; -- 집계 트리거가 바꾸는 경우는 허용
+  -- 집계 트리거나 조회수 함수가 바꾸는 경우는 그대로 허용 (updated_at 도 유지)
+  if pg_trigger_depth() > 1 or current_setting('app.allow_post_counters', true) = '1' then
+    return new;
   end if;
   if (select auth.uid()) is not null and not public.is_admin() then
     new.author_id     := old.author_id;
@@ -217,9 +218,13 @@ create trigger protect_post_fields
 -- 조회수 증가 (누구나 호출 가능)
 create or replace function public.increment_view_count(target_post_id bigint)
 returns void
-language sql security definer set search_path = ''
+language plpgsql security definer set search_path = ''
 as $$
+begin
+  perform set_config('app.allow_post_counters', '1', true);
   update public.posts set view_count = view_count + 1 where id = target_post_id;
+  perform set_config('app.allow_post_counters', '', true);
+end;
 $$;
 
 -- ───────────── 접근 권한 (RLS) ─────────────

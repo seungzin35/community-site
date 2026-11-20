@@ -1,6 +1,8 @@
 import Link from "next/link";
+import { Suspense } from "react";
 import type { Board } from "@/lib/boards";
 import { site } from "@/lib/site";
+import { UserMenu, UserMenuFallback } from "./user-menu";
 
 export function SiteHeader({ boards }: { boards: Board[] }) {
   return (
@@ -9,17 +11,9 @@ export function SiteHeader({ boards }: { boards: Board[] }) {
         <Link href="/" className="text-lg font-bold text-primary">
           {site.name}
         </Link>
-        <div className="flex items-center gap-2 text-sm">
-          <Link href="/login" className="rounded-md px-3 py-1.5 hover:bg-muted">
-            로그인
-          </Link>
-          <Link
-            href="/signup"
-            className="rounded-md bg-primary px-3 py-1.5 font-medium text-primary-foreground hover:opacity-90"
-          >
-            회원가입
-          </Link>
-        </div>
+        <Suspense fallback={<UserMenuFallback />}>
+          <UserMenu />
+        </Suspense>
       </div>
       <nav className="border-t border-border">
         <ul className="mx-auto flex max-w-5xl gap-1 overflow-x-auto px-2 text-sm">
