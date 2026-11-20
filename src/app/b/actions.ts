@@ -6,7 +6,7 @@ import { getCurrentUser } from "@/lib/auth";
 import { IMAGE_BUCKET, MAX_IMAGES } from "@/lib/posts";
 import { createClient } from "@/lib/supabase/server";
 
-export type ActionState = { error?: string } | undefined;
+export type ActionState = { error?: string; message?: string } | undefined;
 
 const LOGIN_REQUIRED = "로그인이 필요해요.";
 const BANNED = "활동이 정지된 계정이에요.";
@@ -185,4 +185,28 @@ export async function votePost(_: ActionState, formData: FormData): Promise<Acti
 
   revalidatePath(`/b/${slug}/${postId}`);
   return undefined;
+}
+
+/** 글 또는 댓글 신고. 같은 대상을 두 번 신고하면 DB의 고유 규칙이 막습니다. */
+export async function reportContent(_: ActionState, formData: FormData): Promise<ActionState> {
+  const member = await requireMember();
+  if ("error" in member) return member;
+
+  const postId = Number(formData.get("postId")) || null;
+  const commentId = Number(formData.get("commentId")) || null;
+  const reason = String(formData.get("reason") ?? "").trim();
+  if (!reason) return { error: "신고 이유를 적어 주세요." };
+  if (reason.length > 500) return { error: "신고 이유는 500자 이하로 해주세요." };
+
+  const target = commentId ? { comment_id: commentId } : { post_id: postId };
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from("reports")
+    .insert({ reporter_id: member.user.id, reason, ...target });
+  if (error) {
+    if (error.code === "23505") return { error: "이미 신고했어요." };
+    console.error("신고 실패:", error.message);
+    return { error: "신고하지 못했어요." };
+  }
+  return { message: "신고했어요. 관리자가 확인할게요." };
 }

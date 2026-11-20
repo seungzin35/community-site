@@ -7,6 +7,9 @@ import { PostGrid, PostTable } from "@/components/post-list";
 import { getBoardBySlug, getPosts, PAGE_SIZE } from "@/lib/posts";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 
+// 회원 정보와 최신 글을 매번 읽어 오므로 서버에서 기다렸다가 보여 줍니다.
+export const instant = false;
+
 export async function generateMetadata({ params }: PageProps<"/b/[slug]">): Promise<Metadata> {
   if (!isSupabaseConfigured) return {};
   const board = await getBoardBySlug((await params).slug);

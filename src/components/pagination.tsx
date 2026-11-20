@@ -1,12 +1,19 @@
 import Link from "next/link";
 
-type Props = { basePath: string; page: number; totalPages: number; query?: string };
+type Props = {
+  basePath: string;
+  page: number;
+  totalPages: number;
+  query?: string;
+  /** 페이지를 넘겨도 유지할 다른 조건 (예: 필터) */
+  params?: Record<string, string>;
+};
 
-export function Pagination({ basePath, page, totalPages, query }: Props) {
+export function Pagination({ basePath, page, totalPages, query, params: extra }: Props) {
   if (totalPages <= 1) return null;
 
   const href = (target: number) => {
-    const params = new URLSearchParams();
+    const params = new URLSearchParams(extra);
     if (target > 1) params.set("page", String(target));
     if (query) params.set("q", query);
     const search = params.toString();

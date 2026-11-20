@@ -4,6 +4,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { CommentList } from "@/components/comment-list";
 import { NotReady } from "@/components/not-ready";
+import { ReportButton } from "@/components/report-button";
 import { VoteButtons } from "@/components/vote-buttons";
 import { getCurrentUser } from "@/lib/auth";
 import { formatFullDate } from "@/lib/format";
@@ -12,6 +13,9 @@ import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { createPublicClient } from "@/lib/supabase/public";
 import { createClient } from "@/lib/supabase/server";
 import { deletePost } from "../../actions";
+
+// 회원 정보와 최신 글을 매번 읽어 오므로 서버에서 기다렸다가 보여 줍니다.
+export const instant = false;
 
 export async function generateMetadata({ params }: PageProps<"/b/[slug]/[postId]">): Promise<Metadata> {
   if (!isSupabaseConfigured) return {};
@@ -67,6 +71,11 @@ export default async function PostPage({ params }: PageProps<"/b/[slug]/[postId]
             <span>{formatFullDate(post.created_at)}</span>
             <span>조회 {post.view_count + 1}</span>
             <span>댓글 {post.comment_count}</span>
+            {user && user.id !== post.author_id && (
+              <span className="ml-auto">
+                <ReportButton postId={id} />
+              </span>
+            )}
           </div>
         </header>
 
