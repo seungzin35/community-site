@@ -227,6 +227,17 @@ begin
 end;
 $$;
 
+-- ───────────── API 접근 허용 ─────────────
+-- 프로젝트 설정과 상관없이 사이트가 테이블에 접근할 수 있게 합니다.
+-- 실제로 무엇을 할 수 있는지는 아래 RLS 정책이 정합니다.
+grant usage on schema public to anon, authenticated;
+grant select on all tables in schema public to anon;
+grant select, insert, update, delete on all tables in schema public to authenticated;
+grant usage, select on all sequences in schema public to authenticated;
+grant execute on function public.increment_view_count(bigint) to anon, authenticated;
+grant execute on function public.is_admin() to anon, authenticated;
+grant execute on function public.is_active_member() to anon, authenticated;
+
 -- ───────────── 접근 권한 (RLS) ─────────────
 alter table public.profiles    enable row level security;
 alter table public.boards      enable row level security;
