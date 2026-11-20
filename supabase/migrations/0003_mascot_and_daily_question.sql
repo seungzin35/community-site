@@ -84,7 +84,10 @@ returns trigger
 language plpgsql security definer set search_path = ''
 as $$
 begin
-  perform public.add_community_xp('post', new.author_id, 10);
+  -- 익명 글/댓글(작성자 없음)은 개인 상한 기록 없이 넘어갑니다.
+  if new.author_id is not null then
+    perform public.add_community_xp('post', new.author_id, 10);
+  end if;
   return null;
 end;
 $$;
@@ -96,7 +99,10 @@ returns trigger
 language plpgsql security definer set search_path = ''
 as $$
 begin
-  perform public.add_community_xp('comment', new.author_id, 3);
+  -- 익명 글/댓글(작성자 없음)은 개인 상한 기록 없이 넘어갑니다.
+  if new.author_id is not null then
+    perform public.add_community_xp('comment', new.author_id, 3);
+  end if;
   return null;
 end;
 $$;
@@ -142,7 +148,7 @@ with acts as (
   union all
   select user_id, (created_at at time zone 'Asia/Seoul')::date, 'vote', 1 from public.post_votes
 ), per_member as (
-  select uid, day, least(sum(pts), 60)::int as xp from acts group by uid, day
+  select uid, day, least(sum(pts), 60)::int as xp from acts where uid is not null group by uid, day
 ), member_rows as (
   insert into public.member_daily_xp (user_id, day, xp)
   select uid, day, xp from per_member
