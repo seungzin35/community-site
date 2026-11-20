@@ -22,7 +22,9 @@ export async function proxy(request: NextRequest) {
     },
   });
 
-  await supabase.auth.getUser();
+  // 로그인 토큰을 확인하고, 만료됐으면 새로 받아 쿠키에 넣습니다.
+  // getClaims 는 서명을 서버 안에서 확인해서 Supabase 에 매번 묻지 않아 빠릅니다.
+  await supabase.auth.getClaims();
   return response;
 }
 
