@@ -274,3 +274,19 @@ body {
 .guide-popover .driver-popover-arrow-side-bottom.driver-popover-arrow {
   border-bottom-color: var(--surface);
 }
+
+/* ---- 함께 키우는 뭉치 ---- */
+.mascot-grow > svg {
+  animation: guide-float 3s ease-in-out infinite;
+}
+.mascot-grow .mc-arm {
+  transform-box: fill-box;
+  transform-origin: 0% 30%;
+  animation: guide-wave 3.5s ease-in-out infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .mascot-grow > svg,
+  .mascot-grow .mc-arm {
+    animation: none;
+  }
+}

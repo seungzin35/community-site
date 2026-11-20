@@ -2,9 +2,13 @@ import { ChevronRight, Clock, Flame, Images, MessageSquare, PenLine } from "luci
 import Link from "next/link";
 import { connection } from "next/server";
 import { Suspense } from "react";
+import { MascotCard } from "@/components/community/mascot-card";
+import { QuestionCard } from "@/components/community/question-card";
 import { Logo } from "@/components/logo";
 import { PostTable } from "@/components/post-list";
 import { getBoards } from "@/lib/boards";
+import { getMascotState, getTodayQuestion } from "@/lib/community";
+import { levelInfo } from "@/lib/mascot-level";
 import { getPopularPosts, getRecentPosts } from "@/lib/posts";
 import { site } from "@/lib/site";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
@@ -41,6 +45,27 @@ async function Feeds() {
         <PostTable posts={recent} compact />
       </section>
     </>
+  );
+}
+
+async function CommunityCorner() {
+  // 뭉치 점수와 오늘의 질문도 방문할 때마다 새로 불러옵니다.
+  await connection();
+  const [mascot, question] = await Promise.all([getMascotState(), getTodayQuestion()]);
+  return (
+    <div className="grid gap-4 md:grid-cols-2">
+      <MascotCard state={mascot} />
+      <QuestionCard question={question} level={levelInfo(mascot.total_xp).level} />
+    </div>
+  );
+}
+
+function CornerFallback() {
+  return (
+    <div className="grid gap-4 md:grid-cols-2" aria-label="불러오는 중">
+      <div className="card h-64 animate-pulse" />
+      <div className="card h-64 animate-pulse" />
+    </div>
   );
 }
 
@@ -92,6 +117,12 @@ export default async function HomePage() {
           )}
         </div>
       </section>
+
+      {isSupabaseConfigured && (
+        <Suspense fallback={<CornerFallback />}>
+          <CommunityCorner />
+        </Suspense>
+      )}
 
       <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_300px]">
         <div className="min-w-0 space-y-8">

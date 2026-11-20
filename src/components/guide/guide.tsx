@@ -5,7 +5,10 @@ import { Sparkles, X } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { useCallback, useEffect, useState, useSyncExternalStore } from "react";
 import { type PageKind, pageKind, tips, tourSteps } from "./content";
-import { MASCOT_NAME, mascotSvg } from "./mascot";
+import { createClient } from "@/lib/supabase/client";
+import { isSupabaseConfigured } from "@/lib/supabase/config";
+import { levelInfo, type MascotState } from "@/lib/mascot-level";
+import { MASCOT_NAME, mascotSvgForLevel } from "./mascot";
 
 /*
  * 안내 도우미 뭉치
@@ -60,13 +63,45 @@ function seenPages(): PageKind[] {
   }
 }
 
-export function MascotImage({ className = "" }: { className?: string }) {
-  return <span className={`block ${className}`} dangerouslySetInnerHTML={{ __html: mascotSvg }} />;
+const LEVEL_KEY = "guide:level";
+
+/** 커뮤니티 레벨 (모두가 함께 키우는 뭉치). 10분 동안은 저장해 둔 값을 씁니다. */
+function useCommunityLevel() {
+  const [level, setLevel] = useState(2);
+  useEffect(() => {
+    if (!isSupabaseConfigured) return;
+    let cancelled = false;
+    async function load() {
+      try {
+        const saved = JSON.parse(sessionStorage.getItem(LEVEL_KEY) ?? "null");
+        if (saved && Date.now() - saved.at < 10 * 60 * 1000) return saved.level as number;
+      } catch {}
+      const { data } = await createClient().rpc("get_mascot_state");
+      if (!data) return null;
+      const next = levelInfo((data as MascotState).total_xp).level;
+      try {
+        sessionStorage.setItem(LEVEL_KEY, JSON.stringify({ level: next, at: Date.now() }));
+      } catch {}
+      return next;
+    }
+    load().then((next) => {
+      if (!cancelled && next) setLevel(next);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+  return level;
+}
+
+export function MascotImage({ level, className = "" }: { level: number; className?: string }) {
+  return <span className={`block ${className}`} dangerouslySetInnerHTML={{ __html: mascotSvgForLevel(level) }} />;
 }
 
 export function Guide() {
   const pathname = usePathname();
   const off = useGuideOff();
+  const level = useCommunityLevel();
   const [bubble, setBubble] = useState<{ kind: PageKind; steps: number } | null>(null);
   const [touring, setTouring] = useState(false);
 
@@ -111,7 +146,7 @@ export function Guide() {
       onPopoverRender: (popover) => {
         const face = document.createElement("span");
         face.className = "guide-popover-face";
-        face.innerHTML = mascotSvg;
+        face.innerHTML = mascotSvgForLevel(level);
         popover.title.prepend(face);
       },
       onDestroyed: () => setTouring(false),
@@ -169,7 +204,7 @@ export function Guide() {
         title={`${MASCOT_NAME}에게 물어보기`}
         className="guide-mascot pointer-events-auto size-12 drop-shadow-lg transition-transform hover:scale-110 active:scale-95 sm:size-[72px]"
       >
-        <MascotImage className="size-full" />
+        <MascotImage level={level} className="size-full" />
       </button>
     </div>
   );
