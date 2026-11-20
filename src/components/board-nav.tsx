@@ -7,10 +7,13 @@ import type { Board } from "@/lib/boards";
 /** 헤더 아래 게시판 탭. 지금 보고 있는 게시판에 밑줄을 그어 줍니다. */
 export function BoardNav({ boards }: { boards: Board[] }) {
   const pathname = usePathname();
-  const items = [{ href: "/", label: "홈" }, ...boards.map((board) => ({ href: `/b/${board.slug}`, label: board.name }))];
+  const items = [
+    { href: "/", label: "홈", gallery: false },
+    ...boards.map((board) => ({ href: `/b/${board.slug}`, label: board.name, gallery: board.type === "gallery" })),
+  ];
 
   return (
-    <nav aria-label="게시판">
+    <nav aria-label="게시판" data-tour="boards">
       <ul className="no-scrollbar mx-auto flex max-w-6xl gap-1 overflow-x-auto px-2 text-[15px] sm:px-4">
         {items.map((item) => {
           const active = item.href === "/" ? pathname === "/" : pathname === item.href || pathname.startsWith(`${item.href}/`);
@@ -19,6 +22,7 @@ export function BoardNav({ boards }: { boards: Board[] }) {
               <Link
                 href={item.href}
                 aria-current={active ? "page" : undefined}
+                data-tour={item.gallery ? "gallery" : undefined}
                 className={`relative block whitespace-nowrap px-3 py-3 font-medium transition-colors ${
                   active ? "text-foreground" : "text-muted-foreground hover:text-foreground"
                 }`}

@@ -72,7 +72,7 @@ export function PostForm({ action, slug, userId, post, isGallery }: Props) {
   }
 
   return (
-    <form onSubmit={onSubmit} className="card space-y-4 p-4 sm:p-6">
+    <form onSubmit={onSubmit} className="card space-y-4 p-4 sm:p-6" data-tour="post-form">
       <input type="hidden" name="slug" value={slug} />
       {post && <input type="hidden" name="postId" value={post.id} />}
 

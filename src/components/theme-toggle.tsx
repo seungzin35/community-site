@@ -19,6 +19,7 @@ export function ThemeToggle() {
       type="button"
       onClick={toggle}
       aria-label="화면 밝기 바꾸기"
+      data-tour="theme"
       title="화면 밝기 바꾸기"
       className="btn btn-ghost size-9 p-0 text-muted-foreground hover:text-foreground"
     >

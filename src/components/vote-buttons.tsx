@@ -15,7 +15,7 @@ export function VoteButtons({ slug, postId, likes, dislikes, myVote }: Props) {
     <form action={action} className="flex flex-col items-center gap-2">
       <input type="hidden" name="slug" value={slug} />
       <input type="hidden" name="postId" value={postId} />
-      <div className="flex gap-3">
+      <div className="flex gap-3" data-tour="vote">
         <button
           name="value"
           value="1"

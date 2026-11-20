@@ -31,12 +31,12 @@ async function Feeds() {
   return (
     <>
       {popular.length > 0 && (
-        <section>
+        <section data-tour="feeds">
           <SectionTitle icon={<Flame className="size-4" />} title="인기글" tone="hot" />
           <PostTable posts={popular} compact />
         </section>
       )}
-      <section>
+      <section data-tour={popular.length > 0 ? undefined : "feeds"}>
         <SectionTitle icon={<Clock className="size-4" />} title="최신글" tone="primary" />
         <PostTable posts={recent} compact />
       </section>
@@ -82,7 +82,7 @@ export default async function HomePage() {
           <p className="mt-3 text-sm text-white/80 sm:text-base">{site.description}</p>
           {firstBoard && (
             <div className="mt-6 flex flex-wrap gap-2">
-              <Link href={`/b/${firstBoard.slug}/write`} className="btn bg-white text-[#4b4bc8] hover:bg-white/90">
+              <Link href={`/b/${firstBoard.slug}/write`} data-tour="write" className="btn bg-white text-[#4b4bc8] hover:bg-white/90">
                 <PenLine className="size-4" /> 글쓰기
               </Link>
               <Link href={`/b/${firstBoard.slug}`} className="btn bg-white/15 text-white hover:bg-white/25">
