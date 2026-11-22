@@ -10,7 +10,10 @@ const sparkle = (x: number, y: number, r: number) =>
 
 export function mascotSvgForLevel(level = 1) {
   const gold = level >= 9;
-  const body = gold ? "mc-body-gold" : "mc-body";
+  // 그라데이션(url(#id))은 쓰지 않습니다. 같은 그림이 숨겨진 화면에 먼저 있으면
+  // 브라우저가 색을 못 찾아 몸통이 투명해지는 문제가 있었어요.
+  const bodyColor = gold ? "#f8b93a" : "#7272e8";
+  const shine = gold ? "#fde68a" : "#9d9df8";
   const limb = gold ? "#e8a317" : "#5b5bd6";
   const parts: string[] = [];
 
@@ -51,8 +54,9 @@ export function mascotSvgForLevel(level = 1) {
 
   // 몸
   parts.push(
-    `<path d="M60 18C33 18 16 38 16 64c0 26 18 44 44 44s44-18 44-44c0-26-17-46-44-46z" fill="url(#${body})"/>
-     <ellipse cx="60" cy="80" rx="26" ry="22" fill="url(#mc-belly)"/>
+    `<path d="M60 18C33 18 16 38 16 64c0 26 18 44 44 44s44-18 44-44c0-26-17-46-44-46z" fill="${bodyColor}"/>
+     <ellipse cx="44" cy="34" rx="18" ry="10" fill="${shine}" opacity=".7" transform="rotate(-20 44 34)"/>
+     <ellipse cx="60" cy="80" rx="26" ry="22" fill="#f1f1ff"/>
      <path d="M18 70c-8 2-11 9-7 13 3 3 8 0 10-5z" fill="${limb}"/>
      <path class="mc-arm" d="M102 70c8 2 11 9 7 13-3 3-8 0-10-5z" fill="${limb}"/>
      <ellipse cx="44" cy="56" rx="7.5" ry="9" fill="#1e1b4b"/>
@@ -93,16 +97,6 @@ export function mascotSvgForLevel(level = 1) {
   }
 
   return `<svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-  <defs>
-    <linearGradient id="${body}" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="${gold ? "#fde68a" : "#8f8ff7"}"/>
-      <stop offset="1" stop-color="${gold ? "#f59e0b" : "#5b5bd6"}"/>
-    </linearGradient>
-    <linearGradient id="mc-belly" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0" stop-color="#ffffff" stop-opacity=".9"/>
-      <stop offset="1" stop-color="#e4e4ff" stop-opacity=".9"/>
-    </linearGradient>
-  </defs>
   ${parts.join("\n  ")}
 </svg>`;
 }
