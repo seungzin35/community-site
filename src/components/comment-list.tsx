@@ -47,7 +47,7 @@ export function CommentList({ comments, slug, postId, user }: Props) {
   );
 
   return (
-    <section className="card p-5 sm:p-6">
+    <section className="card p-5 sm:p-6" data-tour="comments">
       <h2 className="mb-4 flex items-center gap-1.5 text-base font-bold">
         댓글 <span className="text-primary">{comments.length}</span>
       </h2>

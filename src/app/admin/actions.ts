@@ -176,3 +176,67 @@ export async function deleteReportedTarget(formData: FormData) {
   }
   refreshSite();
 }
+
+// ───────────── 오늘의 질문 ─────────────
+
+/** 질문 추가: 한 줄에 하나씩. 줄 맨 뒤에 붙습니다. */
+export async function addQuestions(_: AdminState, formData: FormData): Promise<AdminState> {
+  const admin = await adminClient();
+  if (!admin) return NO_PERMISSION;
+  const lines = String(formData.get("questions") ?? "")
+    .split("\n")
+    .map((line) => line.trim())
+    .filter(Boolean);
+  if (!lines.length) return { error: "질문을 적어 주세요." };
+  const tooLong = lines.find((line) => line.length < 2 || line.length > 200);
+  if (tooLong) return { error: `질문은 2~200자로 해주세요: "${tooLong.slice(0, 20)}..."` };
+  if (lines.length > 100) return { error: "한 번에 100개까지 넣을 수 있어요." };
+
+  const { data: last } = await admin.supabase
+    .from("daily_questions")
+    .select("queue_order")
+    .order("queue_order", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  const start = (last?.queue_order ?? 0) + 1;
+  const { error } = await admin.supabase
+    .from("daily_questions")
+    .insert(lines.map((content, index) => ({ content, queue_order: start + index })));
+  if (error) {
+    console.error("질문 추가 실패:", error.message);
+    return { error: "질문을 추가하지 못했어요." };
+  }
+  revalidatePath("/admin/questions");
+  return { message: `질문 ${lines.length}개를 줄 세웠어요.` };
+}
+
+/** 대기 중인 질문을 맨 앞으로 (내일 열릴 질문이 됨) */
+export async function moveQuestionFirst(formData: FormData) {
+  const admin = await adminClient();
+  if (!admin) return;
+  const id = Number(formData.get("id"));
+  const { data: first } = await admin.supabase
+    .from("daily_questions")
+    .select("queue_order")
+    .is("open_date", null)
+    .order("queue_order")
+    .limit(1)
+    .maybeSingle();
+  const { error } = await admin.supabase
+    .from("daily_questions")
+    .update({ queue_order: (first?.queue_order ?? 0) - 1 })
+    .eq("id", id)
+    .is("open_date", null);
+  if (error) console.error("질문 순서 변경 실패:", error.message);
+  revalidatePath("/admin/questions");
+}
+
+export async function deleteQuestion(formData: FormData) {
+  const admin = await adminClient();
+  if (!admin) return;
+  const id = Number(formData.get("id"));
+  const { error } = await admin.supabase.from("daily_questions").delete().eq("id", id);
+  if (error) console.error("질문 삭제 실패:", error.message);
+  revalidatePath("/admin/questions");
+  revalidatePath("/question", "layout");
+}

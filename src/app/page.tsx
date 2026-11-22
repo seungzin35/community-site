@@ -2,9 +2,13 @@ import { ChevronRight, Clock, Flame, Images, MessageSquare, PenLine } from "luci
 import Link from "next/link";
 import { connection } from "next/server";
 import { Suspense } from "react";
+import { MascotCard } from "@/components/community/mascot-card";
+import { QuestionCard } from "@/components/community/question-card";
 import { Logo } from "@/components/logo";
 import { PostTable } from "@/components/post-list";
 import { getBoards } from "@/lib/boards";
+import { getMascotState, getTodayQuestion } from "@/lib/community";
+import { levelInfo } from "@/lib/mascot-level";
 import { getPopularPosts, getRecentPosts } from "@/lib/posts";
 import { site } from "@/lib/site";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
@@ -31,16 +35,37 @@ async function Feeds() {
   return (
     <>
       {popular.length > 0 && (
-        <section>
+        <section data-tour="feeds">
           <SectionTitle icon={<Flame className="size-4" />} title="인기글" tone="hot" />
           <PostTable posts={popular} compact />
         </section>
       )}
-      <section>
+      <section data-tour={popular.length > 0 ? undefined : "feeds"}>
         <SectionTitle icon={<Clock className="size-4" />} title="최신글" tone="primary" />
         <PostTable posts={recent} compact />
       </section>
     </>
+  );
+}
+
+async function CommunityCorner() {
+  // 뭉치 점수와 오늘의 질문도 방문할 때마다 새로 불러옵니다.
+  await connection();
+  const [mascot, question] = await Promise.all([getMascotState(), getTodayQuestion()]);
+  return (
+    <div className="grid gap-4 md:grid-cols-2">
+      <MascotCard state={mascot} />
+      <QuestionCard question={question} level={levelInfo(mascot.total_xp).level} />
+    </div>
+  );
+}
+
+function CornerFallback() {
+  return (
+    <div className="grid gap-4 md:grid-cols-2" aria-label="불러오는 중">
+      <div className="card h-64 animate-pulse" />
+      <div className="card h-64 animate-pulse" />
+    </div>
   );
 }
 
@@ -82,7 +107,7 @@ export default async function HomePage() {
           <p className="mt-3 text-sm text-white/80 sm:text-base">{site.description}</p>
           {firstBoard && (
             <div className="mt-6 flex flex-wrap gap-2">
-              <Link href={`/b/${firstBoard.slug}/write`} className="btn bg-white text-[#4b4bc8] hover:bg-white/90">
+              <Link href={`/b/${firstBoard.slug}/write`} data-tour="write" className="btn bg-white text-[#4b4bc8] hover:bg-white/90">
                 <PenLine className="size-4" /> 글쓰기
               </Link>
               <Link href={`/b/${firstBoard.slug}`} className="btn bg-white/15 text-white hover:bg-white/25">
@@ -92,6 +117,12 @@ export default async function HomePage() {
           )}
         </div>
       </section>
+
+      {isSupabaseConfigured && (
+        <Suspense fallback={<CornerFallback />}>
+          <CommunityCorner />
+        </Suspense>
+      )}
 
       <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_300px]">
         <div className="min-w-0 space-y-8">
