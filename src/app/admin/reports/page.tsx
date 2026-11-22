@@ -4,7 +4,13 @@ import { deleteReportedTarget, setReportStatus } from "@/app/admin/actions";
 import { Badge, Empty, Section } from "@/components/admin-ui";
 import { ConfirmButton } from "@/components/confirm-button";
 import { Pagination } from "@/components/pagination";
-import { ADMIN_PAGE_SIZE, readPage } from "@/lib/admin";
+import {
+  ADMIN_PAGE_SIZE,
+  adminAuthorName,
+  COMMENT_OWNER,
+  POST_OWNER,
+  readPage,
+} from "@/lib/admin";
 import { formatFullDate } from "@/lib/format";
 import { createClient } from "@/lib/supabase/server";
 
@@ -16,11 +22,18 @@ type Row = {
   status: "open" | "resolved" | "dismissed";
   created_at: string;
   reporter: { nickname: string } | null;
-  post: { id: number; title: string; board: { slug: string } | null; author: { nickname: string } | null } | null;
+  post: {
+    id: number;
+    title: string;
+    board: { slug: string } | null;
+    author: { nickname: string } | null;
+    owner: { user: { nickname: string } | null } | null;
+  } | null;
   comment: {
     id: number;
     content: string;
     author: { nickname: string } | null;
+    owner: { user: { nickname: string } | null } | null;
     post: { id: number; board: { slug: string } | null } | null;
   } | null;
 };
@@ -38,8 +51,8 @@ export default async function AdminReportsPage({ searchParams }: PageProps<"/adm
     .select(
       `id, reason, status, created_at,
        reporter:profiles!reports_reporter_id_fkey(nickname),
-       post:posts(id, title, board:boards(slug), author:profiles!posts_author_id_fkey(nickname)),
-       comment:comments(id, content, author:profiles!comments_author_id_fkey(nickname), post:posts(id, board:boards(slug)))`,
+       post:posts(id, title, board:boards(slug), author:profiles!posts_author_id_fkey(nickname), ${POST_OWNER}),
+       comment:comments(id, content, author:profiles!comments_author_id_fkey(nickname), ${COMMENT_OWNER}, post:posts(id, board:boards(slug)))`,
       { count: "exact" },
     )
     .order("created_at", { ascending: false })
@@ -67,14 +80,14 @@ export default async function AdminReportsPage({ searchParams }: PageProps<"/adm
               ? {
                   kind: "글",
                   text: report.post.title,
-                  author: report.post.author?.nickname,
+                  author: adminAuthorName(report.post.author, report.post.owner),
                   href: `/b/${report.post.board?.slug}/${report.post.id}`,
                 }
               : report.comment
                 ? {
                     kind: "댓글",
                     text: report.comment.content,
-                    author: report.comment.author?.nickname,
+                    author: adminAuthorName(report.comment.author, report.comment.owner),
                     href: `/b/${report.comment.post?.board?.slug}/${report.comment.post?.id}`,
                   }
                 : null;

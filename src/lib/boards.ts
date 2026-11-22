@@ -8,6 +8,8 @@ export type Board = {
   name: string;
   description: string;
   type: "normal" | "gallery";
+  /** 익명 게시판이면 글쓴이가 '익명'으로 보여요. */
+  is_anonymous?: boolean;
 };
 
 /** Supabase 연결 전에 화면 틀을 확인하기 위한 예시 게시판 */
@@ -28,7 +30,7 @@ export async function getBoards(): Promise<Board[]> {
   const supabase = createPublicClient();
   const { data, error } = await supabase
     .from("boards")
-    .select("id, slug, name, description, type")
+    .select("id, slug, name, description, type, is_anonymous")
     .eq("is_active", true)
     .order("sort_order");
 

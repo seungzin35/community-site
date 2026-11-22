@@ -221,7 +221,7 @@ export function GuideRestart() {
         write(OFF_KEY, null);
         write(SEEN_KEY, null);
       }}
-      className="text-xs text-muted-foreground underline-offset-2 hover:text-primary hover:underline"
+      className="text-left text-xs text-muted-foreground underline-offset-2 hover:text-primary hover:underline sm:text-right"
     >
       안내 도우미 {MASCOT_NAME} 다시 부르기
     </button>
