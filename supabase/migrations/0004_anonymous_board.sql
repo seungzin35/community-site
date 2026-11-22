@@ -252,35 +252,3 @@ insert into public.boards (slug, name, description, type, sort_order, is_anonymo
 values ('advice', '익명 고민상담소', '닉네임 없이 털어놓는 고민, 함께 들어 드려요', 'normal', 4, true)
 on conflict (slug) do nothing;
 
--- ───────────── 뭉치 키우기(0003)와 함께 쓸 때 ─────────────
--- 익명 글/댓글은 작성자 칸이 비어 있으므로 회원 점수는 주지 않습니다(누가 썼는지 드러나지 않게).
--- 0003을 아직 실행하지 않았다면 이 부분은 그냥 건너뜁니다.
-do $guard$
-begin
-  if to_regprocedure('public.add_community_xp(text, uuid, integer)') is not null then
-    create or replace function public.xp_on_post()
-    returns trigger
-    language plpgsql security definer set search_path = ''
-    as $fn$
-    begin
-      if new.author_id is not null then
-        perform public.add_community_xp('post', new.author_id, 10);
-      end if;
-      return null;
-    end;
-    $fn$;
-
-    create or replace function public.xp_on_comment()
-    returns trigger
-    language plpgsql security definer set search_path = ''
-    as $fn$
-    begin
-      if new.author_id is not null then
-        perform public.add_community_xp('comment', new.author_id, 3);
-      end if;
-      return null;
-    end;
-    $fn$;
-  end if;
-end;
-$guard$;

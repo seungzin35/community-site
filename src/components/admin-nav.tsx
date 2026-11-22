@@ -7,6 +7,7 @@ const menu = [
   { href: "/admin", label: "요약" },
   { href: "/admin/reports", label: "신고" },
   { href: "/admin/boards", label: "게시판" },
+  { href: "/admin/questions", label: "오늘의 질문" },
   { href: "/admin/members", label: "회원" },
   { href: "/admin/posts", label: "게시글" },
   { href: "/admin/comments", label: "댓글" },
