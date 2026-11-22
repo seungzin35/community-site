@@ -2,4 +2,6 @@
 export const site = {
   name: "커뮤니티",
   description: "자유롭게 이야기를 나누는 커뮤니티",
+  /** 실제 사이트 주소. 검색엔진과 링크 미리보기에 쓰입니다. */
+  url: process.env.NEXT_PUBLIC_SITE_URL || "https://community.zinnote.kr",
 };
