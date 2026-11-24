@@ -1,5 +1,6 @@
 import type { MetadataRoute } from "next";
 import { cacheLife } from "next/cache";
+import { games } from "@/lib/games";
 import { site } from "@/lib/site";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { createPublicClient } from "@/lib/supabase/public";
@@ -13,6 +14,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: site.url, changeFrequency: "hourly", priority: 1 },
     { url: `${site.url}/question`, changeFrequency: "daily", priority: 0.8 },
     { url: `${site.url}/question/hall`, changeFrequency: "daily", priority: 0.6 },
+    { url: `${site.url}/games`, changeFrequency: "weekly", priority: 0.6 },
+    ...games.map((game) => ({ url: `${site.url}/games/${game.id}`, changeFrequency: "daily" as const, priority: 0.5 })),
   ];
   if (!isSupabaseConfigured) return entries;
 
