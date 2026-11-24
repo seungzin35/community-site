@@ -4,7 +4,8 @@ import Link from "next/link";
 import { connection } from "next/server";
 import { Suspense } from "react";
 import { MascotFigure } from "@/components/community/mascot-figure";
-import { formatRecord, games, getLeaderboard, type GameInfo } from "@/lib/games";
+import { formatRecord, games, type GameInfo } from "@/lib/games";
+import { getLeaderboard } from "@/lib/games-data";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 
 export const metadata: Metadata = {
@@ -43,7 +44,7 @@ export default function GamesPage() {
         </div>
       </section>
 
-      <ul className="grid gap-3 sm:grid-cols-3">
+      <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
         {games.map((game) => (
           <li key={game.id}>
             <Link

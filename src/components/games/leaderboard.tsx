@@ -1,5 +1,6 @@
 import { Crown, Medal } from "lucide-react";
-import { formatRecord, getLeaderboard, getMyRecord, type GameInfo } from "@/lib/games";
+import { formatRecord, type GameInfo } from "@/lib/games";
+import { getLeaderboard, getMyRecord } from "@/lib/games-data";
 import { getCurrentUser } from "@/lib/auth";
 
 const medal = ["text-[#e8a317]", "text-[#9a9cab]", "text-[#c2773d]"];
@@ -15,7 +16,7 @@ export async function Leaderboard({ game }: { game: GameInfo }) {
         <span className="inline-flex items-center gap-1.5">
           <Crown className="size-4 text-[#e8a317]" /> 순위표
         </span>
-        <span className="text-xs font-medium text-muted-foreground">{game.higherBetter ? "점수 높은 순" : "기록 빠른 순"}</span>
+        <span className="text-xs font-medium text-muted-foreground">{game.id === "quiz" ? "맞힌 날 많은 순" : game.higherBetter ? "점수 높은 순" : "기록 빠른 순"}</span>
       </h2>
       {mine && (
         <p className="flex items-center justify-between bg-primary-soft px-4 py-2.5 text-sm">

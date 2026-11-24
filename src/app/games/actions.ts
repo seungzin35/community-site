@@ -28,3 +28,25 @@ export async function submitScore(gameId: string, score: number): Promise<Submit
   revalidatePath("/games");
   return { ok: true, best: row?.best ?? Math.round(score), isNewBest: !!row?.is_new_best };
 }
+
+export type QuizGuessResult =
+  | { word: string; marks: number[]; solved: boolean; tries: number; answer: string | null; error?: undefined }
+  | { error: string };
+
+/** 초성 퀴즈 답 내기. 채점과 기록은 DB 함수가 합니다. (정답은 브라우저로 보내지 않음) */
+export async function guessQuiz(guess: string, attempt: number): Promise<QuizGuessResult> {
+  const word = guess.replace(/\s/g, "").slice(0, 10);
+  if (!word) return { error: "단어를 써 주세요." };
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc("quiz_guess", { p_guess: word, p_attempt: attempt });
+  if (error || !data) {
+    console.error("초성 퀴즈 채점 실패:", error?.message);
+    return { error: "채점하지 못했어요. 잠시 뒤 다시 해 주세요." };
+  }
+  const result = data as QuizGuessResult;
+  if (!result.error) {
+    revalidatePath("/games/quiz");
+    revalidatePath("/games");
+  }
+  return result;
+}

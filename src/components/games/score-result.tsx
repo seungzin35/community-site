@@ -27,6 +27,13 @@ export function ScoreResult({
   const router = useRouter();
   const [result, setResult] = useState<SubmitResult | null>(null);
   const sent = useRef(0);
+  // 게임하다 연타한 손가락이 바로 버튼을 누르지 않도록 잠깐 막아 둡니다.
+  const [armed, setArmed] = useState(false);
+
+  useEffect(() => {
+    const id = setTimeout(() => setArmed(true), 700);
+    return () => clearTimeout(id);
+  }, [round]);
 
   useEffect(() => {
     if (sent.current === round) return;
@@ -41,7 +48,7 @@ export function ScoreResult({
   }, [game, score, round, router]);
 
   return (
-    <div className="flex flex-col items-center gap-2 text-center">
+    <div className={`flex flex-col items-center gap-2 text-center ${armed ? "" : "pointer-events-none"}`}>
       <p className="text-sm font-semibold text-muted-foreground">{title ?? "이번 기록"}</p>
       <p className="text-4xl font-black tracking-tight">{formatRecord(game, score)}</p>
       <div className="min-h-6 text-sm">
