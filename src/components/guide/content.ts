@@ -1,7 +1,7 @@
 import type { DriveStep } from "driver.js";
 
 /** 지금 보고 있는 페이지 종류 */
-export type PageKind = "home" | "board" | "gallery" | "anonymous" | "post" | "write" | "login" | "signup" | "admin" | "question" | "other";
+export type PageKind = "home" | "board" | "gallery" | "anonymous" | "post" | "write" | "login" | "signup" | "admin" | "question" | "games" | "other";
 
 export function pageKind(pathname: string): PageKind {
   if (pathname === "/") return "home";
@@ -9,6 +9,7 @@ export function pageKind(pathname: string): PageKind {
   if (pathname === "/signup") return "signup";
   if (pathname.startsWith("/admin")) return "admin";
   if (pathname.startsWith("/question")) return "question";
+  if (pathname.startsWith("/games")) return "games";
   if (/^\/b\/[^/]+\/write$/.test(pathname) || /^\/b\/[^/]+\/\d+\/edit$/.test(pathname)) return "write";
   if (/^\/b\/[^/]+\/\d+$/.test(pathname)) return "post";
   if (/^\/b\/[^/]+$/.test(pathname)) {
@@ -33,6 +34,7 @@ export const tips: Record<PageKind, string> = {
   admin: "관리자 화면이에요. 신고된 글을 처리하고, 게시판을 추가하고, 회원을 관리할 수 있어요.",
   question:
     "매일 밤 12시에 제가 새 질문을 내요! 답을 남겨야 다른 사람들의 답이 열리고, 좋아요를 가장 많이 받은 답은 명예의 전당에 올라가요.",
+  games: "저랑 게임 한 판 해요! 로그인하고 하면 최고 기록이 순위표에 올라가요. 1등 자리를 지켜 보세요!",
   other: "궁금한 게 있으면 저를 눌러 주세요!",
 };
 
@@ -41,7 +43,7 @@ const allSteps: (DriveStep & { pages: PageKind[] })[] = [
   {
     pages: ["home", "board", "gallery", "anonymous", "post"],
     element: '[data-tour="boards"]',
-    popover: { title: "게시판 메뉴", description: "여기서 자유게시판, 유머게시판, 사진갤러리를 오갈 수 있어요." },
+    popover: { title: "게시판 메뉴", description: "여기서 자유게시판, 사진갤러리, 웹게임 등을 오갈 수 있어요." },
   },
   {
     pages: ["home"],
@@ -97,12 +99,12 @@ const allSteps: (DriveStep & { pages: PageKind[] })[] = [
     popover: { side: "top", title: "글 쓰는 곳", description: "제목, 내용, 사진을 넣고 '등록'을 누르면 끝이에요." },
   },
   {
-    pages: ["home", "board", "gallery", "anonymous", "post", "write", "question", "other"],
+    pages: ["home", "board", "gallery", "anonymous", "post", "write", "question", "games", "other"],
     element: '[data-tour="signup"]',
     popover: { title: "회원가입", description: "가입하면 글쓰기, 댓글, 추천을 모두 할 수 있어요. 1분이면 끝나요!" },
   },
   {
-    pages: ["home", "board", "gallery", "anonymous", "post", "write", "login", "signup", "admin", "question", "other"],
+    pages: ["home", "board", "gallery", "anonymous", "post", "write", "login", "signup", "admin", "question", "games", "other"],
     element: '[data-tour="theme"]',
     popover: { title: "밤에는 어둡게", description: "눈이 부시면 이 버튼으로 어두운 화면으로 바꿀 수 있어요." },
   },

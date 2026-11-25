@@ -10,6 +10,7 @@ export function BoardNav({ boards }: { boards: Board[] }) {
   const items = [
     { href: "/", label: "홈", gallery: false },
     { href: "/question", label: "오늘의 질문", gallery: false },
+    { href: "/games", label: "웹게임", gallery: false },
     ...boards.map((board) => ({ href: `/b/${board.slug}`, label: board.name, gallery: board.type === "gallery" })),
   ];
 
